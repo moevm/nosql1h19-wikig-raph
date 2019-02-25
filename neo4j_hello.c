@@ -1,3 +1,5 @@
+//gcc neo4j_hello.c -lneo4j-client -lssl -lcrypto
+
 #include <neo4j-client.h>
 #include <errno.h>
 #include <stdio.h>
