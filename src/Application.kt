@@ -15,6 +15,8 @@ import io.ktor.client.request.*
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
+import io.ktor.server.engine.applicationEngineEnvironment
+import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.jetty.Jetty
 import kotlinx.coroutines.runBlocking
@@ -22,13 +24,19 @@ import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>)
 {
-    val server = embeddedServer(
-        Jetty,
-        port = 8080,
-        module = Application::module
-    ).apply {
-        start(wait = false)
+    var env = applicationEngineEnvironment {
+        module{
+            module()
+            api()
+        }
+
+        connector {
+            host = "0.0.0.0"
+            port = 8080
+        }
     }
+    val server = embeddedServer(Jetty, env)
+    server.start(wait = true)
 }
 
 @Suppress("unused") // Referenced in application.conf
@@ -46,7 +54,6 @@ fun Application.module() {
 
 
 
-    val client = HttpClient(Apache)
 
 
 
@@ -80,15 +87,19 @@ fun Application.module() {
                 wikipediaApiRequest.url.path("w", "api.php")
                 wikipediaApiRequest.parameter("action", "query")
                 wikipediaApiRequest.parameter("format", "json")
-                wikipediaApiRequest.parameter("prop", "categories")
+                wikipediaApiRequest.parameter("prop", "links")
                 wikipediaApiRequest.parameter("titles", "Adolf Hitler")
-                wikipediaApiRequest.parameter("cllimit", "max")
+                wikipediaApiRequest.parameter("pllimit", "max")
                 println(wikipediaApiRequest.build().url)
-                response = client.get<String>(wikipediaApiRequest)
+                //response = client.get<String>(wikipediaApiRequest)
             }
 
-            call.respond(JsonParser().parse(response))
+            call.respond(JsonParser().parse(response).asString)
+
         }
+
+
+
 
         static ("/css"){
             // This marks index.html from the 'web' folder in resources as the default file to serve.
@@ -106,6 +117,54 @@ fun Application.module() {
         }
     }
 
+}
+
+
+
+fun Route.getTitle(client : HttpClient)
+{
+    get("/title/{titleName?}")
+    {
+        val titleName = call.parameters["titleName"]
+        var response = ""
+        runBlocking{
+
+
+            val wikipediaApiRequest = HttpRequestBuilder()
+            wikipediaApiRequest.host = "wikipedia.com"
+            wikipediaApiRequest.port = 80
+            wikipediaApiRequest.method = HttpMethod("http")
+            wikipediaApiRequest.url.path("w", "api.php")
+            wikipediaApiRequest.parameter("action", "query")
+            wikipediaApiRequest.parameter("format", "json")
+            wikipediaApiRequest.parameter("prop", "links")
+            wikipediaApiRequest.parameter("titles", titleName)
+            wikipediaApiRequest.parameter("pllimit", "max")
+            println(wikipediaApiRequest.build().url)
+            response = client.get<String>(wikipediaApiRequest)
+        }
+
+        call.respond(JsonParser().parse(response).asString)
+    }
+}
+
+fun Route.api(client : HttpClient)
+{
+
+    route("/api")
+    {
+        getTitle(client)
+    }
+}
+
+fun Application.api()
+{
+
+    val client = HttpClient(Apache)
+
+    routing {
+        api(client)
+    }
 }
 
 data class IndexData(val items: List<Int>)
