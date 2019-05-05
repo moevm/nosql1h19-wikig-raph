@@ -1,8 +1,8 @@
 package com.wikiparser
 
+import com.google.gson.JsonParser
 import io.ktor.application.*
 import io.ktor.response.*
-import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.http.*
 import freemarker.cache.*
@@ -11,31 +11,43 @@ import io.ktor.gson.*
 import io.ktor.features.*
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
+import io.ktor.client.request.*
 import io.ktor.http.content.defaultResource
-import io.ktor.http.content.resolveResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
-import org.eclipse.jetty.util.resource.Resource
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.jetty.Jetty
+import kotlinx.coroutines.runBlocking
 
-import java.io.File
 
-
-fun main(args: Array<String>): Unit = io.ktor.server.jetty.EngineMain.main(args)
+fun main(args: Array<String>)
+{
+    val server = embeddedServer(
+        Jetty,
+        port = 8080,
+        module = Application::module
+    ).apply {
+        start(wait = false)
+    }
+}
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.module() {
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "/templates")
     }
 
     install(ContentNegotiation) {
         gson {
+            setPrettyPrinting()
         }
     }
 
-    val client = HttpClient(Apache) {
-    }
+
+
+    val client = HttpClient(Apache)
+
 
 
 
@@ -53,6 +65,29 @@ fun Application.module(testing: Boolean = false) {
 
         get("/json/gson") {
             call.respond(mapOf("hello" to "world"))
+
+        }
+
+        get("/getHitler") {
+            var response = ""
+            runBlocking{
+
+
+                val wikipediaApiRequest = HttpRequestBuilder()
+                wikipediaApiRequest.host = "wikipedia.com"
+                wikipediaApiRequest.port = 80
+                wikipediaApiRequest.method = HttpMethod("http")
+                wikipediaApiRequest.url.path("w", "api.php")
+                wikipediaApiRequest.parameter("action", "query")
+                wikipediaApiRequest.parameter("format", "json")
+                wikipediaApiRequest.parameter("prop", "categories")
+                wikipediaApiRequest.parameter("titles", "Adolf Hitler")
+                wikipediaApiRequest.parameter("cllimit", "max")
+                println(wikipediaApiRequest.build().url)
+                response = client.get<String>(wikipediaApiRequest)
+            }
+
+            call.respond(JsonParser().parse(response))
         }
 
         static ("/css"){
