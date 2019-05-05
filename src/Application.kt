@@ -15,7 +15,10 @@ import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resolveResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
+import org.eclipse.jetty.util.resource.Resource
+
 import java.io.File
+
 
 fun main(args: Array<String>): Unit = io.ktor.server.jetty.EngineMain.main(args)
 
@@ -39,8 +42,9 @@ fun Application.module(testing: Boolean = false) {
     routing {
         get("/") {
             //call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-            val indexStr = File(javaClass.getResource("/html/index.html").toURI()).readText()
-            call.respondText(indexStr, ContentType.Text.Html)
+            val indexPageRes = javaClass.getResourceAsStream("/html/index.html")
+
+            call.respondText(indexPageRes.reader().readText(), ContentType.Text.Html)
         }
 
         get("/html-freemarker") {
