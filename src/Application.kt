@@ -53,7 +53,7 @@ fun Application.module() {
     }
 
 
-
+    val client = HttpClient(Apache)
 
 
 
@@ -91,13 +91,12 @@ fun Application.module() {
                 wikipediaApiRequest.parameter("titles", "Adolf Hitler")
                 wikipediaApiRequest.parameter("pllimit", "max")
                 println(wikipediaApiRequest.build().url)
-                //response = client.get<String>(wikipediaApiRequest)
+                response = client.get<String>(wikipediaApiRequest)
             }
 
             call.respond(JsonParser().parse(response).asString)
 
         }
-
 
 
 
@@ -121,49 +120,54 @@ fun Application.module() {
 
 
 
-fun Route.getTitle(client : HttpClient)
+fun Route.getTitle()
 {
-    get("/title/{titleName?}")
+
+    get("/title/{titleName?}/")
     {
         val titleName = call.parameters["titleName"]
-        var response = ""
-        runBlocking{
+        if (titleName != null) {
+            val client = HttpClient(Apache)
+            var response = ""
+
+            runBlocking {
+                val wikipediaApiRequest = HttpRequestBuilder()
+                wikipediaApiRequest.host = "wikipedia.com"
+                wikipediaApiRequest.port = 80
+                wikipediaApiRequest.method = HttpMethod("http")
+                wikipediaApiRequest.url.path("w", "api.php")
+                wikipediaApiRequest.parameter("action", "query")
+                wikipediaApiRequest.parameter("format", "json")
+                wikipediaApiRequest.parameter("prop", "links")
+                wikipediaApiRequest.parameter("titles", titleName)
+                wikipediaApiRequest.parameter("pllimit", "max")
+                println(wikipediaApiRequest.build().url)
+                response = client.get<String>(wikipediaApiRequest)
+            }
 
 
-            val wikipediaApiRequest = HttpRequestBuilder()
-            wikipediaApiRequest.host = "wikipedia.com"
-            wikipediaApiRequest.port = 80
-            wikipediaApiRequest.method = HttpMethod("http")
-            wikipediaApiRequest.url.path("w", "api.php")
-            wikipediaApiRequest.parameter("action", "query")
-            wikipediaApiRequest.parameter("format", "json")
-            wikipediaApiRequest.parameter("prop", "links")
-            wikipediaApiRequest.parameter("titles", titleName)
-            wikipediaApiRequest.parameter("pllimit", "max")
-            println(wikipediaApiRequest.build().url)
-            response = client.get<String>(wikipediaApiRequest)
+
+            call.respond(JsonParser().parse(response))
         }
-
-        call.respond(JsonParser().parse(response).asString)
     }
 }
 
-fun Route.api(client : HttpClient)
+fun Routing.api()
 {
 
     route("/api")
     {
-        getTitle(client)
+        getTitle()
     }
 }
 
 fun Application.api()
 {
 
-    val client = HttpClient(Apache)
+
 
     routing {
-        api(client)
+        api()
     }
 }
 
