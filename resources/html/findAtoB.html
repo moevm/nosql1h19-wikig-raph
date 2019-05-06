@@ -8,19 +8,19 @@
 	</head>
 	<body >
 			<div class="search w3-display-container w3-row"> 
-				<form class="w3-display-middle w3-col l7 m8 s10" action="/html/loadResult.html">
+				<form class="w3-display-middle w3-col l7 m8 s10" action="/html/result.html" method="GET">
 					<h2>Найти</h2>
 					<div class="row">
 						<label>От</label><br>
-						<input type="text" placeholder="Ссылка на статью #1">
+						<input type="text" placeholder="Ссылка на статью #1" name="startArticle">
 					</div>
 					<div class="row">
 						<label>До</label><br>
-						<input type="text" placeholder="Ссылка на статью #2">
+						<input type="text" placeholder="Ссылка на статью #2" name="endArticle">
 					</div>
 					<div class="row">
 						<label>Глубина поиска</label><br>
-						<input type="text" placeholder="default (5)"><br>	
+						<input type="text" placeholder="default (5)" name="searchDepth"><br>
 					</div><br>
 					<input type="submit" class="w3-btn w3-light-blue" value="Искать путь">
 				</form>

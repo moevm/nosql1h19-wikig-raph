@@ -1,33 +1,55 @@
-plugins {
-    id 'java'
-    id 'application'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }
 
-mainClassName = "hello.Main"
+
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
 
 group 'wikiparser'
-version '0.399ver'
+version '0.4.0'
+mainClassName = "com.wikiparser.ApplicationKt"
 
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
+sourceSets {
+    main.kotlin.srcDirs = main.java.srcDirs = ['src']
+    test.kotlin.srcDirs = test.java.srcDirs = ['test']
+    main.resources.srcDirs = ['resources']
+    test.resources.srcDirs = ['testresources']
 }
 
 
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven { url 'https://kotlin.bintray.com/ktor' }
+}
+
 dependencies {
-    compile "joda-time:joda-time:2.2"
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.10.v20180503'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.10.v20180503'
-    compile group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '9.4.10.v20180503'
-    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "io.ktor:ktor-server-jetty:$ktor_version"
+    compile "ch.qos.logback:logback-classic:$logback_version"
+    compile "io.ktor:ktor-server-core:$ktor_version"
+    compile "io.ktor:ktor-freemarker:$ktor_version"
+    compile "io.ktor:ktor-gson:$ktor_version"
+    compile "io.ktor:ktor-client-core:$ktor_version"
+    compile "io.ktor:ktor-client-core-jvm:$ktor_version"
+    compile "io.ktor:ktor-client-apache:$ktor_version"
     compile 'org.neo4j.driver:neo4j-java-driver:1.7.3'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "io.ktor:ktor-server-tests:$ktor_version"
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'hello.Main'
+        attributes 'Main-Class': 'com.wikiparser.ApplicationKt'
     }
+
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
