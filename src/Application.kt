@@ -1,5 +1,7 @@
 package com.wikiparser
 
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import io.ktor.application.*
 import io.ktor.response.*
@@ -20,11 +22,83 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.jetty.Jetty
 import kotlinx.coroutines.runBlocking
+import com.wikiparser.clients.Neo4jClient
+import com.wikiparser.clients.WikipediaApiClient
 
 
 fun main(args: Array<String>)
 {
-    var env = applicationEngineEnvironment {
+    val testJson = "{\n" +
+            "    \"continue\": {\n" +
+            "        \"plcontinue\": \"2731583|0|Garrison_Church_(Potsdam)\",\n" +
+            "        \"continue\": \"||categories\"\n" +
+            "    },\n" +
+            "    \"limits\": {\n" +
+            "        \"categories\": 500\n" +
+            "    },\n" +
+            "    \"query\": {\n" +
+            "        \"pages\": {\n" +
+            "            \"2731583\": {\n" +
+            "                \"pageid\": 2731583,\n" +
+            "                \"ns\": 0,\n" +
+            "                \"title\": \"Adolf Hitler\",\n" +
+            "                \"links\": [\n" +
+            "                    {\n" +
+            "                        \"ns\": 0,\n" +
+            "                        \"title\": \"F\\u00fchrersonderzug\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"ns\": 0,\n" +
+            "                        \"title\": \"Gabriele D'Annunzio\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"ns\": 0,\n" +
+            "                        \"title\": \"Galeazzo Ciano\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"ns\": 0,\n" +
+            "                        \"title\": \"Ganap Party\"\n" +
+            "                    },\n" +
+            "                    {\n" +
+            "                        \"ns\": 0,\n" +
+            "                        \"title\": \"Garmisch-Partenkirchen\"\n" +
+            "                    }\n" +
+            "                ]\n" +
+            "            }\n" +
+            "        }\n" +
+            "    }\n" +
+            "}"
+
+    var testJsonStr = "        {\"links\": [\n" +
+            "          {\n" +
+            "            \"ns\": 0,\n" +
+            "            \"title\": \"1934 Montreux Fascist conference\"\n" +
+            "          },\n" +
+            "          {\n" +
+            "            \"ns\": 0,\n" +
+            "            \"title\": \"1936 Summer Olympics\"\n" +
+            "          }]}"
+
+    var testJsonArray = JsonParser().parse(testJsonStr).asJsonObject.getAsJsonArray("links")
+
+    val test = JsonParser().parse(testJson).asJsonObject.get("continue").asJsonObject.get("continue").asString
+
+    var testJsonObject = JsonParser().parse(testJson)
+    val wtf = testJsonObject.asJsonObject
+        .getAsJsonObject("query").getAsJsonObject("pages").keySet().first()
+        //.getAsJsonArray("pages")
+    val linksList = testJsonObject
+        .asJsonObject
+        .getAsJsonObject("query")
+        .getAsJsonObject("pages")
+        .getAsJsonObject(wtf)
+        .getAsJsonArray("links")
+        .addAll(testJsonArray)
+
+
+
+
+     var env = applicationEngineEnvironment {
         module{
             module()
             api()
@@ -79,22 +153,9 @@ fun Application.module() {
             var response = ""
             runBlocking{
 
-
-                val wikipediaApiRequest = HttpRequestBuilder()
-                wikipediaApiRequest.host = "wikipedia.com"
-                wikipediaApiRequest.port = 80
-                wikipediaApiRequest.method = HttpMethod("http")
-                wikipediaApiRequest.url.path("w", "api.php")
-                wikipediaApiRequest.parameter("action", "query")
-                wikipediaApiRequest.parameter("format", "json")
-                wikipediaApiRequest.parameter("prop", "links")
-                wikipediaApiRequest.parameter("titles", "Adolf Hitler")
-                wikipediaApiRequest.parameter("pllimit", "max")
-                println(wikipediaApiRequest.build().url)
-                response = client.get<String>(wikipediaApiRequest)
+                call.respond(WikipediaApiClient.getLinks(""))
             }
 
-            call.respond(JsonParser().parse(response).asString)
 
         }
 
@@ -120,35 +181,41 @@ fun Application.module() {
 
 
 
-fun Route.getTitle()
-{
+fun Route.getTitle() {
 
-    get("/title/{titleName?}/")
+    get("/title")
     {
         val titleName = call.parameters["titleName"]
+        val doStore = call.parameters["doStore"]
         if (titleName != null) {
             val client = HttpClient(Apache)
-            var response = ""
+            var response = JsonObject()
 
             runBlocking {
-                val wikipediaApiRequest = HttpRequestBuilder()
-                wikipediaApiRequest.host = "wikipedia.com"
-                wikipediaApiRequest.port = 80
-                wikipediaApiRequest.method = HttpMethod("http")
-                wikipediaApiRequest.url.path("w", "api.php")
-                wikipediaApiRequest.parameter("action", "query")
-                wikipediaApiRequest.parameter("format", "json")
-                wikipediaApiRequest.parameter("prop", "links")
-                wikipediaApiRequest.parameter("titles", titleName)
-                wikipediaApiRequest.parameter("pllimit", "max")
-                println(wikipediaApiRequest.build().url)
-                response = client.get<String>(wikipediaApiRequest)
+                response = WikipediaApiClient.getLinks(titleName)
             }
 
+            if (doStore != null) {
+                if (doStore == "true") {
+                    Neo4jClient.getInstance("bolt://deadlyshine.ml:7687", "neo4j", "h1tlerTRACE")
+                        .addTitle(response)
 
+                }
+            }
 
-            call.respond(JsonParser().parse(response))
+            call.respond(response)
         }
+    }
+
+    get("/getLinks")
+    {
+        val titleName = call.parameters["titleName"].toString()
+
+
+        val result = Neo4jClient.getInstance("bolt://deadlyshine.ml:7687", "neo4j", "h1tlerTRACE")
+            .getLinks(titleName)
+
+        call.respond(result)
     }
 }
 
