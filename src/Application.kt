@@ -197,7 +197,7 @@ fun Route.getTitle() {
 
             if (doStore != null) {
                 if (doStore == "true") {
-                    Neo4jClient.getInstance("bolt://deadlyshine.ml:7687", "neo4j", "h1tlerTRACE")
+                    Neo4jClient.getInstance("bolt://localhost.ml:7687", "neo4j", "h1tlerTRACE")
                         .addTitle(response)
 
                 }
@@ -212,7 +212,7 @@ fun Route.getTitle() {
         val titleName = call.parameters["titleName"].toString()
 
 
-        val result = Neo4jClient.getInstance("bolt://deadlyshine.ml:7687", "neo4j", "h1tlerTRACE")
+        val result = Neo4jClient.getInstance("bolt://localhost.ml:7687", "neo4j", "h1tlerTRACE")
             .getLinks(titleName)
 
         call.respond(result)
