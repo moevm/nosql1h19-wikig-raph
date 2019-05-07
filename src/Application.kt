@@ -28,77 +28,9 @@ import com.wikiparser.clients.WikipediaApiClient
 
 fun main(args: Array<String>)
 {
-    val testJson = "{\n" +
-            "    \"continue\": {\n" +
-            "        \"plcontinue\": \"2731583|0|Garrison_Church_(Potsdam)\",\n" +
-            "        \"continue\": \"||categories\"\n" +
-            "    },\n" +
-            "    \"limits\": {\n" +
-            "        \"categories\": 500\n" +
-            "    },\n" +
-            "    \"query\": {\n" +
-            "        \"pages\": {\n" +
-            "            \"2731583\": {\n" +
-            "                \"pageid\": 2731583,\n" +
-            "                \"ns\": 0,\n" +
-            "                \"title\": \"Adolf Hitler\",\n" +
-            "                \"links\": [\n" +
-            "                    {\n" +
-            "                        \"ns\": 0,\n" +
-            "                        \"title\": \"F\\u00fchrersonderzug\"\n" +
-            "                    },\n" +
-            "                    {\n" +
-            "                        \"ns\": 0,\n" +
-            "                        \"title\": \"Gabriele D'Annunzio\"\n" +
-            "                    },\n" +
-            "                    {\n" +
-            "                        \"ns\": 0,\n" +
-            "                        \"title\": \"Galeazzo Ciano\"\n" +
-            "                    },\n" +
-            "                    {\n" +
-            "                        \"ns\": 0,\n" +
-            "                        \"title\": \"Ganap Party\"\n" +
-            "                    },\n" +
-            "                    {\n" +
-            "                        \"ns\": 0,\n" +
-            "                        \"title\": \"Garmisch-Partenkirchen\"\n" +
-            "                    }\n" +
-            "                ]\n" +
-            "            }\n" +
-            "        }\n" +
-            "    }\n" +
-            "}"
-
-    var testJsonStr = "        {\"links\": [\n" +
-            "          {\n" +
-            "            \"ns\": 0,\n" +
-            "            \"title\": \"1934 Montreux Fascist conference\"\n" +
-            "          },\n" +
-            "          {\n" +
-            "            \"ns\": 0,\n" +
-            "            \"title\": \"1936 Summer Olympics\"\n" +
-            "          }]}"
-
-    var testJsonArray = JsonParser().parse(testJsonStr).asJsonObject.getAsJsonArray("links")
-
-    val test = JsonParser().parse(testJson).asJsonObject.get("continue").asJsonObject.get("continue").asString
-
-    var testJsonObject = JsonParser().parse(testJson)
-    val wtf = testJsonObject.asJsonObject
-        .getAsJsonObject("query").getAsJsonObject("pages").keySet().first()
-        //.getAsJsonArray("pages")
-    val linksList = testJsonObject
-        .asJsonObject
-        .getAsJsonObject("query")
-        .getAsJsonObject("pages")
-        .getAsJsonObject(wtf)
-        .getAsJsonArray("links")
-        .addAll(testJsonArray)
 
 
-
-
-     var env = applicationEngineEnvironment {
+    var env = applicationEngineEnvironment {
         module{
             module()
             api()
@@ -197,7 +129,7 @@ fun Route.getTitle() {
 
             if (doStore != null) {
                 if (doStore == "true") {
-                    Neo4jClient.getInstance("bolt://localhost.ml:7687", "neo4j", "h1tlerTRACE")
+                    Neo4jClient.getInstance("bolt://localhost:7687", "neo4j", "neo4j")
                         .addTitle(response)
 
                 }
@@ -212,7 +144,7 @@ fun Route.getTitle() {
         val titleName = call.parameters["titleName"].toString()
 
 
-        val result = Neo4jClient.getInstance("bolt://localhost.ml:7687", "neo4j", "h1tlerTRACE")
+        val result = Neo4jClient.getInstance("bolt://localhost:7687", "neo4j", "h1tlerTRACE")
             .getLinks(titleName)
 
         call.respond(result)
