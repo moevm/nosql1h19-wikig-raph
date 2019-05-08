@@ -1,25 +1,26 @@
 package com.wikiparser.clients
 
+import com.wikiparser.tools.Settings
+
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.neo4j.driver.v1.*
 
 import org.neo4j.driver.v1.Values.parameters
+import java.net.URI
 
-class Neo4jClient(uri: String, user: String, password: String) {
+object Neo4jClient {
     // Driver objects are thread-safe and are typically made available application-wide.
-    private var driver: Driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password))
 
-    companion object {
-        private var instance : Neo4jClient? = null
+    private var driver : Driver
 
-        fun  getInstance(uri: String, user: String, password: String): Neo4jClient {
-            if (instance == null)  // NOT thread safe!
-                instance = Neo4jClient(uri, user, password)
+    init {
 
-            return instance!!
-        }
+        val uri = "bolt://${Settings.getNeo4jHost()}:${Settings.getNeo4jPort()}"
+        driver= GraphDatabase.driver(uri,
+            AuthTokens.basic(
+                Settings.getNeo4jLogin(), Settings.getNeo4jPassword()))
     }
 
     fun addTitle(title : JsonObject?)
@@ -39,7 +40,7 @@ class Neo4jClient(uri: String, user: String, password: String) {
 
         driver.session().beginTransaction().use{ tx->
 
-            tx.run("CREATE (base:Article {articleTitle: {title}})", parameters("title", baseTitle))
+            tx.run("MERGE (base:Article {articleTitle: {title}})", parameters("title", baseTitle))
 
             repeat(links.size) {
                 val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString

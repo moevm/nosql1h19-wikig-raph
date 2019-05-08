@@ -59,10 +59,6 @@ fun Application.module() {
     }
 
 
-    val client = HttpClient(Apache)
-
-
-
 
     routing {
         get("/") {
@@ -111,7 +107,18 @@ fun Application.module() {
 
 }
 
+fun Route.getLinks()
+{
+    get("/getLinks")
+    {
+        val titleName = call.parameters["titleName"].toString()
 
+
+        val result = Neo4jClient.getLinks(titleName)
+
+        call.respond(result)
+    }
+}
 
 fun Route.getTitle() {
 
@@ -120,7 +127,6 @@ fun Route.getTitle() {
         val titleName = call.parameters["titleName"]
         val doStore = call.parameters["doStore"]
         if (titleName != null) {
-            val client = HttpClient(Apache)
             var response = JsonObject()
 
             runBlocking {
@@ -129,8 +135,7 @@ fun Route.getTitle() {
 
             if (doStore != null) {
                 if (doStore == "true") {
-                    Neo4jClient.getInstance("bolt://localhost:7687", "neo4j", "neo4j")
-                        .addTitle(response)
+                    Neo4jClient.addTitle(response)
 
                 }
             }
@@ -139,24 +144,16 @@ fun Route.getTitle() {
         }
     }
 
-    get("/getLinks")
-    {
-        val titleName = call.parameters["titleName"].toString()
 
-
-        val result = Neo4jClient.getInstance("bolt://localhost:7687", "neo4j", "h1tlerTRACE")
-            .getLinks(titleName)
-
-        call.respond(result)
-    }
 }
 
-fun Routing.api()
+fun Route.api()
 {
 
     route("/api")
     {
         getTitle()
+        getLinks()
     }
 }
 

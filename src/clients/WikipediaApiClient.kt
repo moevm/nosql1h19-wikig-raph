@@ -16,7 +16,7 @@ object WikipediaApiClient : AutoCloseable {
     private val request = HttpRequestBuilder()
     private val url = URLBuilder(
         URLProtocol.HTTP,
-        "wikipedia.com",
+        "en.wikipedia.com",
         80
     )
 
