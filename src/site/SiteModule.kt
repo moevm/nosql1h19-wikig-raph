@@ -15,6 +15,8 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import io.ktor.auth.*
+import io.ktor.routing.route
 import kotlinx.coroutines.runBlocking
 
 fun Application.module() {
@@ -22,36 +24,34 @@ fun Application.module() {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "/templates")
     }
 
+    install(Authentication) {
+        basic {
+            realm = "admin"
+            validate {
+                credentials ->
+                if(credentials.name == credentials.password) {
+                    UserIdPrincipal(credentials.name)
+                } else {
+                    null
+                }
+            }
+        }
+
+    }
+
 
 
     routing {
-        get("/") {
-            //call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
-            val indexPageRes = javaClass.getResourceAsStream("/html/index.html")
+        authenticate {
 
-            call.respondText(indexPageRes.reader().readText(), ContentType.Text.Html)
-        }
-
-        get("/html-freemarker") {
-            call.respond(FreeMarkerContent("index.ftl", mapOf("data" to IndexData(listOf(1, 2, 3))), ""))
-        }
-
-        get("/json/gson") {
-            call.respond(mapOf("hello" to "world"))
-
-        }
-
-        get("/getHitler") {
-            var response = ""
-            runBlocking{
-
-                call.respond(WikipediaApiClient.getLinks(""))
+            route("/admin") {
+                get("/") {
+                    call.respondText("Success, ${call.principal<UserIdPrincipal>()?.name}")
+                }
             }
-
-
         }
 
-
+        siteRoutes()
 
         static ("/css"){
             // This marks index.html from the 'web' folder in resources as the default file to serve.
