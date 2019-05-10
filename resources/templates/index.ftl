@@ -26,13 +26,13 @@
 <div class="container">
 <div class="row">На данный момент в базе находится <span id="sumArticle">X</span> статей</div>
 <form class="row" action="/html/findAtoB.html">
-    <button type="button" class="btn btn-warning btn-lg btn-block">Поиск пути между статьями</button>
+    <button type="submit" class="btn btn-warning btn-lg btn-block">Поиск пути между статьями</button>
 </form>
 <form class="row my-2" action="/html/segment.html">
-    <button type="button" class="btn btn-warning btn-lg btn-block">Представление сегмента википедии</button>
+    <button type="submit" class="btn btn-warning btn-lg btn-block">Представление сегмента википедии</button>
 </form>
 <form class="row" action="/html/findFromA.html">
-    <button type="button" class="btn btn-warning btn-lg btn-block">Поиск путей от указанной статьи</button>
+    <button type="submit" class="btn btn-warning btn-lg btn-block">Поиск путей от указанной статьи</button>
 </form>
 <hr>
 <div class=w3-row">
