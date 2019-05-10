@@ -1,14 +1,12 @@
 package com.wikiparser.clients
 
-import com.wikiparser.tools.Settings
-
 import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import org.neo4j.driver.v1.*
-
+import com.wikiparser.tools.Settings
+import org.neo4j.driver.v1.AuthTokens
+import org.neo4j.driver.v1.Driver
+import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values.parameters
-import java.net.URI
 
 object Neo4jClient {
     // Driver objects are thread-safe and are typically made available application-wide.

@@ -1,62 +1,48 @@
 package com.wikiparser.site
 
-import com.wikiparser.clients.WikipediaApiClient
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
-import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.auth.UserIdPrincipal
+import io.ktor.auth.UserPasswordCredential
+import io.ktor.auth.form
 import io.ktor.freemarker.FreeMarker
-import io.ktor.freemarker.FreeMarkerContent
-import io.ktor.http.ContentType
-import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resources
 import io.ktor.http.content.static
-import io.ktor.response.respond
-import io.ktor.response.respondText
-import io.ktor.routing.get
 import io.ktor.routing.routing
-import io.ktor.auth.*
-import io.ktor.routing.route
-import kotlinx.coroutines.runBlocking
+import io.ktor.sessions.Sessions
+import io.ktor.sessions.cookie
+
+data class MySession(val username: String)
 
 fun Application.module() {
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "/templates")
     }
 
-    install(Authentication) {
-        basic {
-            realm = "admin"
-            validate {
-                credentials ->
-                if(credentials.name == credentials.password) {
-                    UserIdPrincipal(credentials.name)
-                } else {
-                    null
-                }
-            }
-        }
-
+    install(Sessions) {
+        cookie<MySession>("SESSION")
     }
 
-
-
-    routing {
-        authenticate {
-
-            route("/admin") {
-                get("/") {
-                    call.respondText("Success, ${call.principal<UserIdPrincipal>()?.name}")
+    install(Authentication) {
+        form  {
+            userParamName = "name"
+            passwordParamName = "password"
+            validate { up: UserPasswordCredential ->
+                when {
+                    up.password == "admin" && up.name == "admin" -> UserIdPrincipal(up.name)
+                    else -> null
                 }
             }
         }
+    }
+
+    routing {
 
         siteRoutes()
 
         static ("/css"){
-            // This marks index.html from the 'web' folder in resources as the default file to serve.
-            defaultResource("index.html", "html")
-            // This serves files from the 'web' folder in the application resources.
             resources("css")
         }
 

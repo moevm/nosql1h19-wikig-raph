@@ -29,6 +29,7 @@ fun Route.getLinks()
 
         val result = Neo4jClient.getLinks(titleName)
 
+
         call.respond(result)
     }
 }
@@ -39,6 +40,7 @@ fun Route.getTitle() {
     {
         val titleName = call.parameters["titleName"]
         val doStore = call.parameters["doStore"]
+        println(call.request.headers.forEach { s, list -> println(s); println(list)  })
         if (titleName != null) {
             var response = JsonObject()
 
