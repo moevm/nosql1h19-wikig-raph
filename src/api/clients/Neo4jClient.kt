@@ -1,6 +1,7 @@
 package com.wikiparser.clients
 
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.wikiparser.tools.Settings
 import org.neo4j.driver.v1.AuthTokens
@@ -21,16 +22,35 @@ object Neo4jClient {
                 Settings.getNeo4jLogin(), Settings.getNeo4jPassword()))
     }
 
-    fun addTitle(title : JsonObject?)
+    fun addTitle(title : JsonObject?) : Boolean
     {
         if(title == null)
         {
-            return
+            return false
         }
 
+        title.has("links")
+        title.has("categories")
+        title.has("title")
+        title.has("id")
 
-        val links = title.getAsJsonArray("links").toList()
-        val categories = title.getAsJsonArray("categories").toList()
+        var links = listOf<JsonElement>()
+        var categories = listOf<JsonElement>()
+
+        if(title.has("links"))
+        {
+            if(title.get("links").isJsonArray)
+            {
+                links = title.getAsJsonArray("links").toList()
+            }
+        }
+
+        if(title.has("categories"))
+        {
+            if(title.get("categories").isJsonArray) {
+                categories = title.getAsJsonArray("categories").toList()
+            }
+        }
         val baseTitle = title.getAsJsonPrimitive("title").asString
         val id = title.getAsJsonPrimitive("id").asString
 
@@ -39,6 +59,12 @@ object Neo4jClient {
         driver.session().beginTransaction().use{ tx->
 
             tx.run("MERGE (base:Article {articleTitle: {title}})", parameters("title", baseTitle))
+
+            if(links == null)
+            {
+                tx.success()
+                return true
+            }
 
             repeat(links.size) {
                 val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
@@ -53,6 +79,8 @@ object Neo4jClient {
             tx.success()
 
         }
+
+        return true
     }
 
     fun getLinks(title : String) : JsonArray
@@ -81,6 +109,29 @@ object Neo4jClient {
         return resultArray
     }
 
+    fun getTitleId(title : String) : Int ?
+    {
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+
+                val result = tx.run(
+                    "MATCH (article:Article {articleTitle: {title}})" +
+                            "RETURN id(article)", parameters("title", title)
+                )
+
+                tx.success()
+                if (result.hasNext())
+                    return result.next().get("id(article)").asInt()
+                else
+                    return null
+            }
+        }
+    }
+
+    fun isTitleExist(title : String) : Boolean
+    {
+        return getTitleId(title) != null
+    }
 
     private fun addPerson(name: String) {
         // Sessions are lightweight and disposable connection wrappers.
