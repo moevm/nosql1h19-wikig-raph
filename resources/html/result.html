@@ -1,128 +1,82 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)http://visjs.org/examples/network/nodeStyles/groups.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Test</title>
-    <meta charset="UTF-8">
-    <title>Title</title>
+<html lang="en">
 
-    <style>
-        body {
-            color: #d3d3d3;
-            font: 12pt arial;
-            background-color: #222222;
-        }
-        canvas {
-            position: relative;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-drag: none;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-            width: 100%;
-            height: 100%;
-        }
-
-        #mynetwork {
-            width:  1250px;
-            height: 550px;
-            border: 1px solid #444444;
-            background-color: #222222;
-        }
-        .vis-network {
-            position: relative;
-            overflow: hidden;
-            touch-action: pan-y;
-            user-select: none;
-            -webkit-user-drag: none;
-            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-            width: 100%;
-            height: 100%;
-        }
-
-    </style>
-
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css">
-
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Результат и статистика - NoSQL Wikipedia Graph</title>
+    <!-- Favicon -->
+  <link rel="shortcut icon" href="img/icon.png" type="image/x-icon">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="css/style.css" rel="stylesheet">
 </head>
 
 <body>
-    <button id='visible_nodes' onclick="visible_nodes_on_move()">Вершины не видны при движении</button>
-    <button id='visible_edges' onclick="visible_edges_on_move()">Ребра не видны при движении</button>
-    <button id='draggable_nodes' onclick="draggable_nodes()">Вершины нельзя двигать</button>
-    <div id="mynetwork">
-        <div class="vis-network" tabindex="900">
-            <canvas></canvas>
-        </div>
+
+  <!-- Start your project here-->
+ <div style="width: 800px; height:500px; background-color: black; margin-left: 23%; margin-top: 5%; opacity: 0.7;"></div>
+ <div class="container">
+   <div class="row">
+    <div class="mx-auto">
+      <div class="btn-group mr-2 mt-2" role="group">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">Статистика</button>
+      </div>
+      <div class="btn-group mr-2 mt-2" role="group">
+        <a href="index.html"><button type="button" class="btn btn-primary">Главная</button></a>
+      </div>
     </div>
+   </div>
+ </div>
+ <!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Статистика:</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group">
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Статей обработано, шт.
+    <span class="badge badge-primary badge-pill">1488</span>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Время на обработку, мин.
+    <span class="badge badge-primary badge-pill">0,5</span>
+  </li>
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    Процент покрытия, %
+    <span class="badge badge-primary badge-pill">85</span>
+  </li>
+</ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Ясно</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- /Start your project here-->
 
-
-<script type="text/javascript" src='/js/data.js'></script>
-<script type="text/javascript">
-
-    // var color = 'gray';
-    // var len = undefined;
-    
-
-    // create a network
-    var container = document.getElementById('mynetwork');
-    var data = {
-        nodes: nodes,
-        edges: edges
-    };
-    var options = {
-        nodes:
-        {
-            shape: 'dot',
-            size: 10,
-            borderWidth: 1,
-        },
-        edges: {
-            width: 1,   
-            arrows: {
-                to: {
-                    scaleFactor: 0.3,
-                    enabled: true
-                }
-            },
-            chosen: false,
-            smooth: {
-                enabled: false
-            }
-
-        },
-        physics: {
-            enabled: false
-        },
-        interaction: {
-            dragNodes: false,
-            hideNodesOnDrag: true,
-            hideEdgesOnDrag: true,
-        },
-        // layout: {
-        //     improvedLayout: false, // disable Kamada Kawai algorithm for initial layout(circle drawing)
-        // },
-    };
-    network = new vis.Network(container, data, options);
-    visible_nodes_on_move = () => {
-        let new_options = Object.assign({}, options);
-        new_options['interaction']['hideNodesOnDrag'] = !new_options['interaction']['hideNodesOnDrag'];
-        document.getElementById('visible_nodes').innerHTML = new_options['interaction']['hideNodesOnDrag'] ? 'Вершины не видны при движении' : 'Вершины видны при движении';
-        network.setOptions(new_options); 
-    }
-    visible_edges_on_move = () => {
-        let new_options = Object.assign({}, options);
-        new_options['interaction']['hideEdgesOnDrag'] = !new_options['interaction']['hideEdgesOnDrag'];
-        document.getElementById('visible_edges').innerHTML = new_options['interaction']['hideEdgesOnDrag'] ? 'Ребра не видны при движении' : 'Ребра видны при движении';
-        network.setOptions(new_options); 
-    }
-    draggable_nodes = () => {
-        let new_options = Object.assign({}, options);
-        new_options['interaction']['dragNodes'] = !new_options['interaction']['dragNodes'];
-        document.getElementById('draggable_nodes').innerHTML = new_options['interaction']['dragNodes'] ? 'Вершины можно двигать' : 'Вершины нельзя двигать';
-        network.setOptions(new_options); 
-    }
-
-</script>
-
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="js/jquery-3.4.0.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
 </body>
+
 </html>
