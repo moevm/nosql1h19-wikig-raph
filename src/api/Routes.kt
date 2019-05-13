@@ -2,6 +2,7 @@ package com.wikiparser.api
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.wikiparser.api.clients.GephiClient
 import com.wikiparser.clients.Neo4jClient
 import com.wikiparser.clients.WikipediaApiClient
 import io.ktor.application.call
@@ -12,14 +13,13 @@ import io.ktor.routing.Route
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.util.flattenForEach
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
 
-fun parseGraphToDepth(startArticle : String, depth : Int) : JsonArray
+fun checkGraphToDepth(startArticle : String, depth : Int)
 {
     var currDepth = depth
-
-    var resultJson = JsonArray()
 
 
     var nodesForIteration = ArrayList<String>()
@@ -34,6 +34,8 @@ fun parseGraphToDepth(startArticle : String, depth : Int) : JsonArray
 
             val titleId = Neo4jClient.getTitleId(currNode)
             var links = Neo4jClient.getLinks(currNode)
+
+            // TODO: There is potential error where article have no any links but we trying to parse it over and over
             if((titleId != null) && (links.size() > 0))
             {
                 links = Neo4jClient.getLinks(currNode)
@@ -49,12 +51,8 @@ fun parseGraphToDepth(startArticle : String, depth : Int) : JsonArray
                 links = Neo4jClient.getLinks(currNode)
 
             }
-            val resultNode = JsonObject()
 
-            resultNode.addProperty("id", titleId)
-            resultNode.add("point_to", links)
 
-            resultJson.add(resultNode)
 
             links.forEach {
                 nodesFromIteration.add(
@@ -70,8 +68,6 @@ fun parseGraphToDepth(startArticle : String, depth : Int) : JsonArray
 
         currDepth--
     }
-
-    return resultJson
 }
 
 fun parametersChecker(parameters : Parameters)
@@ -98,6 +94,7 @@ fun Routing.apiRoutes()
     }
     getLinks()
     getTitle()
+    getLinkedArticles()
 }
 
 fun Route.getLinks()
@@ -139,10 +136,33 @@ fun Route.getTitle() {
         }
     }
 
-    get("/parse/")
+
+}
+
+fun Route.getLinkedArticles()
+{
+    get("/linkedarticles")
     {
-        val depth = call.parameters["depth"] ?: "none"
+        val depth = call.parameters["depth"]?.toInt() ?: 1
         val startArticle = call.parameters["startArticle"] ?: "none"
-        call.respond(parseGraphToDepth(startArticle, depth.toInt()))
+        val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 60
+
+
+        checkGraphToDepth(startArticle, depth.toInt())
+        Neo4jClient.storeLinkedGraphToDepthFromArticle(
+            startArticle,
+            depth,
+            "tmpgraph.graphml",
+            System.getProperty("java.io.tmpdir")
+        )
+
+        println("oppa")
+
+        call.respond(GephiClient.processGraphToSigmaJsonString(
+            "tmpgraph.graphml",
+            System.getProperty("java.io.tmpdir"),
+            secondsForProcessing
+            ))
+
     }
 }

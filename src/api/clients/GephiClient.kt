@@ -47,7 +47,8 @@ object GephiClient {
     }
 
     // Calculate coordinates of nodes and convert resulting graph to json string which can be read by client
-    fun processGraphToSigmaJsonString(name : String, path: String = "/", duration: Long = 60, timeUnit: TimeUnit = TimeUnit.SECONDS) : String
+    fun processGraphToSigmaJsonString(name : String, path: String = "/", duration: Long = 60,
+                                      timeUnit: TimeUnit = TimeUnit.SECONDS) : String
     {
 
         clearGraph()
@@ -90,11 +91,10 @@ object GephiClient {
         //Import file
         val container : Container
         try {
-            val file = File(javaClass.getResource(path + name).toURI())
+            val file = File((path+name))
             container = importController.importFile(file);
             container.getLoader().setEdgeDefault(EdgeDirectionDefault.DIRECTED);   //Force DIRECTED
             container.getLoader().setAllowAutoNode(false);  //Don't create missing nodes
-            println(file.readText())
         } catch (ex : Exception) {
             ex.printStackTrace();
             println("there is no file for me :(")

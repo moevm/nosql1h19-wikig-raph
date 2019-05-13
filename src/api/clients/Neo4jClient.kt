@@ -83,6 +83,24 @@ object Neo4jClient {
         return true
     }
 
+
+    fun storeLinkedGraphToDepthFromArticle(startArticle : String, depth: Int, resultFileName : String, resultFilePath : String = "/")
+    {
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+
+                val result = tx.run(
+                    "CALL apoc.export.graphml.query('MATCH path = (:Article{articleTitle:\"${startArticle}\"})-[*1..$depth]->(:Article)\n" +
+                            "WITH collect(path) AS paths RETURN paths',\'${resultFilePath.replace('\\', '/') + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
+                )
+
+                tx.success()
+
+            }
+        }
+    }
+
+    // TODO: There is no reason anymore to be JSON Array as return value for this one
     fun getLinks(title : String) : JsonArray
     {
 
@@ -96,6 +114,7 @@ object Neo4jClient {
                 tx.success()
 
                 while (result.hasNext()) {
+
                     val record = result.next()
                     // Values can be extracted from a record by index or name.
                     val tmpJsonObj = JsonObject()

@@ -14,7 +14,7 @@ import io.ktor.server.jetty.Jetty
 fun main()
 {
 
-
+    println(System.getProperty("java.io.tmpdir"))
     var envApi = applicationEngineEnvironment {
         module{
             api()
