@@ -53,6 +53,18 @@ fun Application.module() {
         static ("/html") {
             resources("html")
         }
+        
+        static ("/img") {
+            resources("img")
+        }
+        
+        static ("/font") {
+            resources("font")
+        }
+        
+        static ("/scss") {
+            resources("scss")
+        }
     }
 
 }
