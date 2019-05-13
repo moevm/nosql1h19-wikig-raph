@@ -225,7 +225,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     let startArticle = urlParams.get("startArticle")
     let depth = urlParams.get("depth")
-    let host = "http://api."+window.location.hostname;
+    let host = "https://api."+window.location.hostname;
     console.log(`${host}/linkedarticles?startArticle=${startArticle}&depth=${depth}&processfor=10`)
 
     // чтение графа из json, бросается ошибка TypeError: fn is not a constructor
