@@ -39,12 +39,16 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
             if((titleId == null) || (links.size() == 0))
             {
 
-                println("Article: $currNode :: Trying to get links from wikipedia API")
+                println("Article: $currNode :: Not in database")
 
                 runBlocking{
-                    Neo4jClient.addTitle(
-                        WikipediaApiClient.getLinks(currNode)
-                    )
+                    println("--Trying to get links from wikipedia API...")
+
+                    val links = WikipediaApiClient.getLinks(currNode)
+
+                    println("--Trying to store links into NEO4J...")
+                    Neo4jClient.addTitle(links)
+                    println("--Done!")
                 }
 
                 links = Neo4jClient.getLinks(currNode)

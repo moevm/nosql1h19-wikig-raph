@@ -70,33 +70,20 @@ object Neo4jClient {
             categoriesList.add(it.asJsonObject.getAsJsonPrimitive("title").asString)
         }
 
-        driver.session().beginTransaction().use{ tx->
-
-            tx.run("MERGE (base:Article {articleTitle: {title}, categories: {categories}, size: {size}})",
-                parameters("title", baseTitle, "categories", categoriesList, "size", size))
-
-            tx.success()
-            tx.close()
-        }
-
-        if(links == null)
-        {
-            return true
-        }
 
         driver.session().beginTransaction().use { tx->
+            tx.run("MERGE (base:Article {articleTitle: {title}, categories: {categories}, size: {size}})",
+                parameters("title", baseTitle, "categories", categoriesList, "size", size))
             repeat(links.size) {
                 val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
                 tx.run("MERGE (child:Article {articleTitle: {title}})", parameters("title", currTitle))
                 tx.run("MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
                         "(childArticle:Article { articleTitle: {childTitle} }) " +
-                        "MERGE (baseArticle)-[r:ArticleLink]->(childArticle)" +
-                        "RETURN baseArticle.articleTitle, type(r), childArticle.articleTitle",
+                        "MERGE (baseArticle)-[r:ArticleLink]->(childArticle)",
                     parameters("baseTitle", baseTitle, "childTitle", currTitle))
             }
 
             tx.success()
-            tx.close()
         }
 
         return true
