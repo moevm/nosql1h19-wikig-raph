@@ -38,6 +38,9 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
             // TODO: There is potential error where article have no any links but we trying to parse it over and over
             if((titleId == null) || (links.size() == 0))
             {
+
+                println("Article: $currNode :: Trying to get links from wikipedia API")
+
                 runBlocking{
                     Neo4jClient.addTitle(
                         WikipediaApiClient.getLinks(currNode)
@@ -45,6 +48,10 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
                 }
 
                 links = Neo4jClient.getLinks(currNode)
+            }
+            else
+            {
+                println("Article: $currNode :: Already in database")
             }
 
 
@@ -143,7 +150,10 @@ fun Route.getLinkedArticles()
         val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 60
 
 
+        call.application.environment.log.info("Trying to get $startArticle linked articles to depth $depth")
+        call.application.environment.log.info("Start graph checking...")
         checkGraphToDepth(startArticle, depth.toInt())
+        call.application.environment.log.info("Storing result graph to file for further read by GEPHI...")
         Neo4jClient.storeLinkedGraphToDepthFromArticle(
             startArticle,
             depth,
@@ -151,8 +161,7 @@ fun Route.getLinkedArticles()
             System.getProperty("java.io.tmpdir")
         )
 
-        println("oppa")
-
+        call.application.environment.log.info("GEPHI trying to load file...")
         call.respond(GephiClient.processGraphToSigmaJsonString(
             "tmpgraph.graphml",
             System.getProperty("java.io.tmpdir"),
