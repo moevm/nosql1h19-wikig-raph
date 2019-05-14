@@ -75,12 +75,15 @@ object Neo4jClient {
             tx.run("MERGE (base:Article {articleTitle: {title}, categories: {categories}, size: {size}})",
                 parameters("title", baseTitle, "categories", categoriesList, "size", size))
 
-            if(links == null)
-            {
-                tx.success()
-                return true
-            }
+            tx.success()
+        }
 
+        if(links == null)
+        {
+            return true
+        }
+
+        driver.session().beginTransaction().use { tx->
             repeat(links.size) {
                 val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
                 tx.run("MERGE (child:Article {articleTitle: {title}})", parameters("title", currTitle))
@@ -92,7 +95,6 @@ object Neo4jClient {
             }
 
             tx.success()
-
         }
 
         return true
