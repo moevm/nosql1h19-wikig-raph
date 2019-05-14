@@ -36,11 +36,7 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
             var links = Neo4jClient.getLinks(currNode)
 
             // TODO: There is potential error where article have no any links but we trying to parse it over and over
-            if((titleId != null) && (links.size() > 0))
-            {
-                links = Neo4jClient.getLinks(currNode)
-            }
-            else
+            if((titleId == null) || (links.size() == 0))
             {
                 runBlocking{
                     Neo4jClient.addTitle(
@@ -49,7 +45,6 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
                 }
 
                 links = Neo4jClient.getLinks(currNode)
-
             }
 
 

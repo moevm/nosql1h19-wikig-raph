@@ -76,6 +76,7 @@ object Neo4jClient {
                 parameters("title", baseTitle, "categories", categoriesList, "size", size))
 
             tx.success()
+            tx.close()
         }
 
         if(links == null)
@@ -95,6 +96,7 @@ object Neo4jClient {
             }
 
             tx.success()
+            tx.close()
         }
 
         return true
