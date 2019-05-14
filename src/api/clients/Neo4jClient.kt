@@ -29,13 +29,14 @@ object Neo4jClient {
             return false
         }
 
-        title.has("links")
-        title.has("categories")
+
         title.has("title")
         title.has("id")
+        title.has("size")
 
         var links = listOf<JsonElement>()
         var categories = listOf<JsonElement>()
+        var size = -1
 
         if(title.has("links"))
         {
@@ -51,14 +52,28 @@ object Neo4jClient {
                 categories = title.getAsJsonArray("categories").toList()
             }
         }
+
+        if(title.has("size"))
+        {
+            if(title.get("size").isJsonPrimitive)
+            {
+                size = title.getAsJsonPrimitive("size").asString.toInt()
+            }
+        }
         val baseTitle = title.getAsJsonPrimitive("title").asString
         val id = title.getAsJsonPrimitive("id").asString
 
 
 
+        var categoriesList = ArrayList<String>()
+        categories.forEach {
+            categoriesList.add(it.asJsonObject.getAsJsonPrimitive("title").asString)
+        }
+
         driver.session().beginTransaction().use{ tx->
 
-            tx.run("MERGE (base:Article {articleTitle: {title}})", parameters("title", baseTitle))
+            tx.run("MERGE (base:Article {articleTitle: {title}, categories: {categories}, size: {size}})",
+                parameters("title", baseTitle, "categories", categoriesList, "size", size))
 
             if(links == null)
             {
@@ -91,7 +106,7 @@ object Neo4jClient {
 
                 val result = tx.run(
                     "CALL apoc.export.graphml.query('MATCH path = (:Article{articleTitle:\"${startArticle}\"})-[*1..$depth]->(:Article)\n" +
-                            "WITH collect(path) AS paths RETURN paths',\'${resultFilePath.replace('\\', '/') + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
+                            "WITH collect(path) AS paths RETURN paths',\'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
 
                 tx.success()

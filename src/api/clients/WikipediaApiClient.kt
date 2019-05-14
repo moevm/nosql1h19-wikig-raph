@@ -31,10 +31,11 @@ object WikipediaApiClient : AutoCloseable {
 
         url.parameters.append("action", "query")
         url.parameters.append("format", "json")
-        url.parameters.append("prop", "links|categories")
+        url.parameters.append("prop", "links|categories|revisions")
         url.parameters.append("plnamespace", "0")
         url.parameters.append("pllimit", "max")
         url.parameters.append("cllimit", "max")
+        url.parameters.append("rvprop", "size")
 
         request.url(url.build())
     }
@@ -63,6 +64,7 @@ object WikipediaApiClient : AutoCloseable {
         var links = extractLinksFromResponse(responseJson, pageId)
         var categories = extractCategoriesFromResponse(responseJson, pageId)
         var continueObject = extractContinueObject(responseJson)
+        var size = extractSizeOfArticleFromResponse(responseJson, pageId)
 
         while (continueObject != null) {
             val plContinueElement : JsonElement? = continueObject.get("plcontinue")
@@ -96,9 +98,10 @@ object WikipediaApiClient : AutoCloseable {
             continueObject = extractContinueObject(responseJson)
         }
 
-        val resultObject : JsonObject = JsonObject()
+        val resultObject = JsonObject()
         resultObject.addProperty("title", baseArticleName)
         resultObject.addProperty("id", pageId)
+        resultObject.addProperty("size", size ?: "-1")
         resultObject.add("links", links)
         resultObject.add("categories", categories)
 
@@ -106,6 +109,22 @@ object WikipediaApiClient : AutoCloseable {
     }
 
 
+    private fun extractSizeOfArticleFromResponse(responseJson : JsonObject, pageId : String = "") : String?
+    {
+        var currPageId = pageId
+        if(pageId == "")
+            currPageId = extractPageIdFromResponse(responseJson)
+
+        return responseJson
+            .getAsJsonObject("query")
+            .getAsJsonObject("pages")
+            .getAsJsonObject(pageId)
+            ?.getAsJsonArray("revisions")
+            ?.get(0)
+            ?.asJsonObject
+            ?.getAsJsonPrimitive("size")
+            ?.asString
+    }
 
     private fun extractPageIdFromResponse(responseJson : JsonObject) : String
     {

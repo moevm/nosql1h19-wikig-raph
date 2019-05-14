@@ -91,7 +91,7 @@ object GephiClient {
         //Import file
         val container : Container
         try {
-            val file = File((path+name))
+            val file = File(("$path/$name"))
             container = importController.importFile(file);
             container.getLoader().setEdgeDefault(EdgeDirectionDefault.DIRECTED);   //Force DIRECTED
             container.getLoader().setAllowAutoNode(false);  //Don't create missing nodes

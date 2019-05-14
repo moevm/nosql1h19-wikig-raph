@@ -129,7 +129,7 @@ fun Route.getTitle() {
 
             //TODO: Check if should parse node
             if(!Neo4jClient.isTitleExist(titleName))
-                Neo4jClient.addTitle(response)
+                //Neo4jClient.addTitle(response)
 
 
             call.respond(response)
