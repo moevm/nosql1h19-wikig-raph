@@ -104,6 +104,8 @@ fun Routing.apiRoutes()
     getLinks()
     getTitle()
     getLinkedArticles()
+    getOutgoingRelations()
+    getIncomingRelations()
 }
 
 fun Route.getLinks()
@@ -159,7 +161,10 @@ fun Route.getLinkedArticles()
 
         call.application.environment.log.info("Trying to get $startArticle linked articles to depth $depth")
         call.application.environment.log.info("Start graph checking...")
-        checkGraphToDepth(startArticle, depth.toInt())
+        val time = measureNanoTime{
+            checkGraphToDepth(startArticle, depth)
+        } / 1000000
+        call.application.environment.log.info("------store time: $time")
         call.application.environment.log.info("Storing result graph to file for further read by GEPHI...")
         Neo4jClient.storeLinkedGraphToDepthFromArticle(
             startArticle,
@@ -175,5 +180,19 @@ fun Route.getLinkedArticles()
             secondsForProcessing
             ))
 
+    }
+}
+
+fun Route.getOutgoingRelations(){
+    get("/outgoingRelations"){
+        val result = Neo4jClient.outgoingRelations()
+        call.respond(result)
+    }
+}
+
+fun Route.getIncomingRelations(){
+    get("/incomingRelations"){
+        val result = Neo4jClient.incomingRelations()
+        call.respond(result)
     }
 }

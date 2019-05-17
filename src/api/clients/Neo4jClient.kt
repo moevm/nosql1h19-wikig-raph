@@ -60,48 +60,43 @@ object Neo4jClient {
         val baseTitle = title.getAsJsonPrimitive("title").asString
         val id = title.getAsJsonPrimitive("id").asString
 
+        driver.session().beginTransaction().use { tx->
+            tx.run(
+                "MERGE (base:Article {articleTitle: {title}}) " +
+                        "SET base.size = {size}",
+                parameters("title", baseTitle, "size", size)
+            )
 
-
-        val time = measureNanoTime {
-            driver.session().beginTransaction().use { tx->
+            categories.forEach{
+                val category = it.asJsonObject.getAsJsonPrimitive("title").asString
                 tx.run(
-                    "MERGE (base:Article {articleTitle: {title}}) " +
-                            "SET base.size = {size}",
-                    parameters("title", baseTitle, "size", size)
+                    "MERGE (category:Category{categoryTitle: {categoryTitle}})",
+                    parameters("categoryTitle", category)
                 )
-
-                categories.forEach{
-                    val category = it.asJsonObject.getAsJsonPrimitive("title").asString
-                    tx.run(
-                        "MERGE (category:Category{categoryTitle: {categoryTitle}})",
-                        parameters("categoryTitle", category)
-                    )
-                    tx.run(
-                "MATCH (baseArticle:Article { articleTitle: {baseTitle} }), " +
-                        "(category:Category { categoryTitle: {categoryTitle} })" +
-                        "MERGE (category)-[:CategoryLink]->(baseArticle)",
-                        parameters("baseTitle", baseTitle,
-                            "categoryTitle", category)
-                    )
-                }
-
-                repeat(links.size) {
-                    val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
-                    tx.run(
-                        "MERGE (child:Article {articleTitle: {title}})",
-                        parameters("title", currTitle))
-
-                    tx.run(
-                        "MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
-                        "(childArticle:Article { articleTitle: {childTitle} }) " +
-                        "MERGE (baseArticle)-[r:ArticleLink]->(childArticle)",
-                        parameters("baseTitle", baseTitle, "childTitle", currTitle))
-                }
-
-                tx.success()
+                tx.run(
+            "MATCH (baseArticle:Article { articleTitle: {baseTitle} }), " +
+                    "(category:Category { categoryTitle: {categoryTitle} })" +
+                    "MERGE (category)-[:CategoryLink]->(baseArticle)",
+                    parameters("baseTitle", baseTitle,
+                        "categoryTitle", category)
+                )
             }
+
+            repeat(links.size) {
+                val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
+                tx.run(
+                    "MERGE (child:Article {articleTitle: {title}})",
+                    parameters("title", currTitle))
+
+                tx.run(
+                    "MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
+                    "(childArticle:Article { articleTitle: {childTitle} }) " +
+                    "MERGE (baseArticle)-[r:ArticleLink]->(childArticle)",
+                    parameters("baseTitle", baseTitle, "childTitle", currTitle))
+            }
+
+            tx.success()
         }
-        println("__merge link time: $time")
 
         return true
     }
@@ -168,6 +163,64 @@ object Neo4jClient {
                     return null
             }
         }
+    }
+
+    fun outgoingRelations() : JsonArray
+    {
+        val resultArray = JsonArray()
+        driver.session().use {
+            it.beginTransaction().use{ tx->
+
+                val result = tx.run("MATCH (n:Article)\n" +
+                        "WITH size((n)-->()) AS count_of_outgoing_relations\n" +
+                        "RETURN count_of_outgoing_relations AS outgoing_vertexes, " +
+                        "COUNT(count_of_outgoing_relations) AS count_\n" +
+                        "ORDER BY outgoing_vertexes;")
+
+                tx.success()
+
+                while (result.hasNext()) {
+
+                    val record = result.next()
+                    // Values can be extracted from a record by index or name.
+                    val tmpJsonObj = JsonObject()
+                    tmpJsonObj.addProperty("Count of outgoing relations", record.get("outgoing_vertexes").toString())
+                    tmpJsonObj.addProperty("Count of vertexes", record.get("count_").toString())
+                    resultArray.add(tmpJsonObj)
+                }
+            }
+        }
+
+        return resultArray
+    }
+
+    fun incomingRelations() : JsonArray
+    {
+        val resultArray = JsonArray()
+        driver.session().use {
+            it.beginTransaction().use{ tx->
+
+                val result = tx.run("MATCH (n:Article)\n" +
+                        "WITH size(()-[:ArticleLink]->(n)) AS count_of_incoming_relations\n" +
+                        "RETURN count_of_incoming_relations AS incoming_vertexes, " +
+                        "COUNT(count_of_incoming_relations) AS count_\n" +
+                        "ORDER BY count_of_incoming_relations;")
+
+                tx.success()
+
+                while (result.hasNext()) {
+
+                    val record = result.next()
+                    // Values can be extracted from a record by index or name.
+                    val tmpJsonObj = JsonObject()
+                    tmpJsonObj.addProperty("Count of incoming relations", record.get("incoming_vertexes").toString())
+                    tmpJsonObj.addProperty("Count of vertexes", record.get("count_").toString())
+                    resultArray.add(tmpJsonObj)
+                }
+            }
+        }
+
+        return resultArray
     }
 
     fun isTitleExist(title : String) : Boolean
