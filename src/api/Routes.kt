@@ -15,6 +15,7 @@ import io.ktor.routing.get
 import io.ktor.util.flattenForEach
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlin.system.measureNanoTime
 
 
 fun checkGraphToDepth(startArticle : String, depth : Int)
@@ -30,7 +31,7 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
         var nodesFromIteration = ArrayList<String>()
 
         nodesForIteration.forEach {
-            currNode->
+            currNode ->
 
             val titleId = Neo4jClient.getTitleId(currNode)
             var links = Neo4jClient.getLinks(currNode)
@@ -47,8 +48,10 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
                     val links = WikipediaApiClient.getLinks(currNode)
 
                     println("--Trying to store links into NEO4J...")
-                    Neo4jClient.addTitle(links)
-                    println("--Done!")
+                    val time = measureNanoTime{
+                        Neo4jClient.addTitle(links)
+                    }
+                    println("--Done! time: $time")
                 }
 
                 links = Neo4jClient.getLinks(currNode)
@@ -101,6 +104,8 @@ fun Routing.apiRoutes()
     getLinks()
     getTitle()
     getLinkedArticles()
+    getOutgoingRelations()
+    getIncomingRelations()
 }
 
 fun Route.getLinks()
@@ -156,7 +161,10 @@ fun Route.getLinkedArticles()
 
         call.application.environment.log.info("Trying to get $startArticle linked articles to depth $depth")
         call.application.environment.log.info("Start graph checking...")
-        checkGraphToDepth(startArticle, depth.toInt())
+        val time = measureNanoTime{
+            checkGraphToDepth(startArticle, depth)
+        } / 1000000
+        call.application.environment.log.info("------store time: $time")
         call.application.environment.log.info("Storing result graph to file for further read by GEPHI...")
         Neo4jClient.storeLinkedGraphToDepthFromArticle(
             startArticle,
@@ -172,5 +180,19 @@ fun Route.getLinkedArticles()
             secondsForProcessing
             ))
 
+    }
+}
+
+fun Route.getOutgoingRelations(){
+    get("/outgoingRelations"){
+        val result = Neo4jClient.outgoingRelations()
+        call.respond(result)
+    }
+}
+
+fun Route.getIncomingRelations(){
+    get("/incomingRelations"){
+        val result = Neo4jClient.incomingRelations()
+        call.respond(result)
     }
 }
