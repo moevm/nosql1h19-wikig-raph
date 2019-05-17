@@ -8,6 +8,8 @@ import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values.parameters
+import kotlin.system.measureNanoTime
+
 
 object Neo4jClient {
     // Driver objects are thread-safe and are typically made available application-wide.
@@ -28,11 +30,6 @@ object Neo4jClient {
         {
             return false
         }
-
-
-        title.has("title")
-        title.has("id")
-        title.has("size")
 
         var links = listOf<JsonElement>()
         var categories = listOf<JsonElement>()
@@ -65,26 +62,46 @@ object Neo4jClient {
 
 
 
-        var categoriesList = ArrayList<String>()
-        categories.forEach {
-            categoriesList.add(it.asJsonObject.getAsJsonPrimitive("title").asString)
-        }
+        val time = measureNanoTime {
+            driver.session().beginTransaction().use { tx->
+                tx.run(
+                    "MERGE (base:Article {articleTitle: {title}}) " +
+                            "SET base.size = {size}",
+                    parameters("title", baseTitle, "size", size)
+                )
 
+                categories.forEach{
+                    val category = it.asJsonObject.getAsJsonPrimitive("title").asString
+                    tx.run(
+                        "MERGE (category:Category{categoryTitle: {categoryTitle}})",
+                        parameters("categoryTitle", category)
+                    )
+                    tx.run(
+                "MATCH (baseArticle:Article { articleTitle: {baseTitle} }), " +
+                        "(category:Category { categoryTitle: {categoryTitle} })" +
+                        "MERGE (category)-[:CategoryLink]->(baseArticle)",
+                        parameters("baseTitle", baseTitle,
+                            "categoryTitle", category)
+                    )
+                }
 
-        driver.session().beginTransaction().use { tx->
-            tx.run("MERGE (base:Article {articleTitle: {title}, categories: {categories}, size: {size}})",
-                parameters("title", baseTitle, "categories", categoriesList, "size", size))
-            repeat(links.size) {
-                val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
-                tx.run("MERGE (child:Article {articleTitle: {title}})", parameters("title", currTitle))
-                tx.run("MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
+                repeat(links.size) {
+                    val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
+                    tx.run(
+                        "MERGE (child:Article {articleTitle: {title}})",
+                        parameters("title", currTitle))
+
+                    tx.run(
+                        "MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
                         "(childArticle:Article { articleTitle: {childTitle} }) " +
                         "MERGE (baseArticle)-[r:ArticleLink]->(childArticle)",
-                    parameters("baseTitle", baseTitle, "childTitle", currTitle))
-            }
+                        parameters("baseTitle", baseTitle, "childTitle", currTitle))
+                }
 
-            tx.success()
+                tx.success()
+            }
         }
+        println("__merge link time: $time")
 
         return true
     }

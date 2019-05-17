@@ -15,6 +15,7 @@ import io.ktor.routing.get
 import io.ktor.util.flattenForEach
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlin.system.measureNanoTime
 
 
 fun checkGraphToDepth(startArticle : String, depth : Int)
@@ -30,7 +31,7 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
         var nodesFromIteration = ArrayList<String>()
 
         nodesForIteration.forEach {
-            currNode->
+            currNode ->
 
             val titleId = Neo4jClient.getTitleId(currNode)
             var links = Neo4jClient.getLinks(currNode)
@@ -47,8 +48,10 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
                     val links = WikipediaApiClient.getLinks(currNode)
 
                     println("--Trying to store links into NEO4J...")
-                    Neo4jClient.addTitle(links)
-                    println("--Done!")
+                    val time = measureNanoTime{
+                        Neo4jClient.addTitle(links)
+                    }
+                    println("--Done! time: $time")
                 }
 
                 links = Neo4jClient.getLinks(currNode)
