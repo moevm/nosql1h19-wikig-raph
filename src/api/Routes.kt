@@ -106,6 +106,8 @@ fun Routing.apiRoutes()
     getLinkedArticles()
     getOutgoingRelations()
     getIncomingRelations()
+    getCategory()
+    getAllShortestPaths()
     getCountOfArticles()
 }
 
@@ -157,7 +159,7 @@ fun Route.getLinkedArticles()
     {
         val depth = call.parameters["depth"]?.toInt() ?: 1
         val startArticle = call.parameters["startArticle"] ?: "none"
-        val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 60
+        val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 30
 
 
         call.application.environment.log.info("Trying to get $startArticle linked articles to depth $depth")
@@ -195,6 +197,64 @@ fun Route.getIncomingRelations(){
     get("/incomingRelations"){
         val result = Neo4jClient.incomingRelations()
         call.respond(result)
+    }
+}
+
+fun Route.getCategory()
+{
+    get("/articlesOfCategory")
+    {
+        val categoryRespond = call.parameters["category"] ?: ""
+        val category =  if (categoryRespond.isNotEmpty()) "Category:$categoryRespond" else "none"
+        val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 30
+
+//        val result = Neo4jClient.getArticlesOfCategory(category, secondsForProcessing)
+
+
+        call.application.environment.log.info("Getting '$category' articles ")
+
+        call.application.environment.log.info("Storing result graph to file for further read by GEPHI...")
+        Neo4jClient.getCategoryArticles(
+            category,
+            "tmpgraph.graphml",
+            System.getProperty("java.io.tmpdir")
+        )
+
+        call.application.environment.log.info("GEPHI trying to load file...")
+        call.respond(GephiClient.processGraphToSigmaJsonString(
+            "tmpgraph.graphml",
+            System.getProperty("java.io.tmpdir"),
+            secondsForProcessing
+        ))
+    }
+}
+
+fun Route.getAllShortestPaths()
+{
+    get("/allShortestPaths")
+    {
+        val startArticle = call.parameters["startArticle"] ?: ""
+        val finishArticle = call.parameters["finishArticle"] ?: ""
+        val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 30
+
+        call.application.environment.log.info("Searching shortest paths from $startArticle to $finishArticle")
+        call.application.environment.log.info("Start graph checking...")
+
+        Neo4jClient.getAllShortestPaths(
+            startArticle,
+            finishArticle,
+            "tmpgraph.graphml",
+            System.getProperty("java.io.tmpdir")
+        )
+
+        call.application.environment.log.info("GEPHI trying to load file...")
+        call.respond(
+            GephiClient.processGraphToSigmaJsonString(
+                "tmpgraph.graphml",
+                System.getProperty("java.io.tmpdir"),
+                secondsForProcessing
+            )
+        )
     }
 }
 
