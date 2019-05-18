@@ -165,6 +165,24 @@ object Neo4jClient {
         }
     }
 
+    fun getCountOfArticles() : Int
+    {
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+
+                val result = tx.run(
+                    "MATCH (article:Article)" +
+                            "RETURN COUNT(article)")
+
+                tx.success()
+                if (result.hasNext())
+                    return result.next().get("COUNT(article)").asInt()
+                else
+                    return 0
+            }
+        }
+    }
+
     fun outgoingRelations() : JsonArray
     {
         val resultArray = JsonArray()

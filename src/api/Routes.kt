@@ -106,6 +106,7 @@ fun Routing.apiRoutes()
     getLinkedArticles()
     getOutgoingRelations()
     getIncomingRelations()
+    getCountOfArticles()
 }
 
 fun Route.getLinks()
@@ -193,6 +194,13 @@ fun Route.getOutgoingRelations(){
 fun Route.getIncomingRelations(){
     get("/incomingRelations"){
         val result = Neo4jClient.incomingRelations()
+        call.respond(result)
+    }
+}
+
+fun Route.getCountOfArticles(){
+    get("/countOfArticles"){
+        val result = Neo4jClient.getCountOfArticles()
         call.respond(result)
     }
 }
