@@ -17,10 +17,10 @@
   <!-- Your custom styles (optional) -->
   <link href="/css/style.css" rel="stylesheet">
 
-
+  <script src = "/js/index.js"></script>
 </head>
 
-<body>
+<body onload="onLoadPage()">
 
   <!-- Start your project here-->
 <!-- Section description -->
@@ -84,8 +84,49 @@
       <a class="btn btn-indigo btn-sm" href="findFromA.html">Найти</a>
     </div>
   </div>
+</div>
   <!-- Grid column -->
 
+
+  <div class="row text-center">
+
+    <!-- Grid column -->
+    <div class="col-lg-6 col-md-6 mb-lg-0 mb-6">
+      <!--Featured image-->
+      <div class="view overlay rounded z-depth-1">
+
+        <a>
+          <div class="mask rgba-white-slight"></div>
+        </a>
+      </div>
+      <!--Excerpt-->
+      <div class="card-body pb-0">
+        <h4 class="font-weight-bold my-3">Распределение исходящих ребер</h4>
+        <!--<p class="grey-text">Узнать, есть ли связь между двумя статьями на Википедии. Сервис проанализирует ссылки в статье А и построит граф, на котором будет отмечен путь от А до Б.</p>-->
+        <a class="btn btn-indigo btn-sm" href="linkDistribution.html?type=outgoing">Показать</a>
+      </div>
+    </div>
+    <!-- Grid column -->
+
+    <!-- Grid column -->
+    <div class="col-lg-4 col-md-6 mb-md-0 mb-4">
+      <!--Featured image-->
+      <div class="view overlay rounded z-depth-1">
+
+        <a>
+          <div class="mask rgba-white-slight"></div>
+        </a>
+      </div>
+      <!--Excerpt-->
+      <div class="card-body pb-0">
+        <h4 class="font-weight-bold my-3">Распределение исходящих ребер</h4>
+        <!--<p class="grey-text">Пользователь выбирает некоторое подмножество статей Википедии, и сервис строит граф выбранного подмножества с ссылками-ребрами между вершинами-статьями.</p>-->
+        <a class="btn btn-indigo btn-sm" href="linkDistribution.html?type=incoming">Показать</a>
+      </div>
+    </div>
+    <!-- Grid column -->
+
+  </div>
 
 
 

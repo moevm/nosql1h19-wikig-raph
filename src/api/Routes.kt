@@ -108,6 +108,7 @@ fun Routing.apiRoutes()
     getIncomingRelations()
     getCategory()
     getAllShortestPaths()
+    getCountOfArticles()
 }
 
 fun Route.getLinks()
@@ -247,10 +248,19 @@ fun Route.getAllShortestPaths()
         )
 
         call.application.environment.log.info("GEPHI trying to load file...")
-        call.respond(GephiClient.processGraphToSigmaJsonString(
-            "tmpgraph.graphml",
-            System.getProperty("java.io.tmpdir"),
-            secondsForProcessing
-        ))
+        call.respond(
+            GephiClient.processGraphToSigmaJsonString(
+                "tmpgraph.graphml",
+                System.getProperty("java.io.tmpdir"),
+                secondsForProcessing
+            )
+        )
+    }
+}
+
+fun Route.getCountOfArticles(){
+    get("/countOfArticles"){
+        val result = Neo4jClient.getCountOfArticles()
+        call.respond(result)
     }
 }
