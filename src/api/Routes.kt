@@ -235,14 +235,16 @@ fun Route.getAllShortestPaths()
     {
         val startArticle = call.parameters["startArticle"] ?: ""
         val finishArticle = call.parameters["finishArticle"] ?: ""
+        val depth = call.parameters["depth"]?.toInt() ?: 5
         val secondsForProcessing = call.parameters["processfor"]?.toLong() ?: 30
 
-        call.application.environment.log.info("Searching shortest paths from $startArticle to $finishArticle")
+        call.application.environment.log.info("Searching shortest paths from $startArticle to $finishArticle with depth $depth" )
         call.application.environment.log.info("Start graph checking...")
 
         Neo4jClient.getAllShortestPaths(
             startArticle,
             finishArticle,
+            depth,
             "tmpgraph.graphml",
             System.getProperty("java.io.tmpdir")
         )

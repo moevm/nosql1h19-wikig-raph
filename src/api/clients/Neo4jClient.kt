@@ -4,6 +4,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.wikiparser.tools.Settings
+import io.ktor.application.call
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.GraphDatabase
@@ -124,9 +125,8 @@ object Neo4jClient {
             it.beginTransaction().use { tx ->
 
                 tx.run(
-                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)," +
-                            "(:Category{categoryTitle:\"$category\"})-->(m:Article), (n)-[r:ArticleLink]->(m)\n" +
-                            "return n, r, m', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
+                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
+                            "return n', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
                 )
 //                tx.run(
 //                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
@@ -139,16 +139,16 @@ object Neo4jClient {
         }
     }
 
-    fun getAllShortestPaths(startArticle: String, finishArticle: String, resultFileName : String, resultFilePath : String = "/")
+    fun getAllShortestPaths(startArticle: String, finishArticle: String, depth: Int, resultFileName : String, resultFilePath : String = "/")
     {
         driver.session().use {
             it.beginTransaction().use { tx ->
-
+                println("depth: $depth")
                 tx.run(
                     "CALL apoc.export.graphml.query('MATCH (start:Article{articleTitle:\"$startArticle\"})," +
                             "(finish:Article{articleTitle:\"$finishArticle\"})," +
-                            "path = allShortestPaths( (start)-[*..4]-(finish) )\n" +
-                            "RETURN path', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
+                            "path = allShortestPaths( (start)-[*..$depth]-(finish) )\n" +
+                            "RETURN path', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
                 )
 //                tx.run(
 //                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +

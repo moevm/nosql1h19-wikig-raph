@@ -1,6 +1,6 @@
 const urlParams = new URLSearchParams(window.location.search);
 let startArticle = urlParams.get("startArticle")
-let finishArticle = urlParams.get("finishArticle")
+let finishArticle = urlParams.get("endArticle")
 let depth = urlParams.get("depth")
 let category = urlParams.get("category")
 let time = urlParams.get("processfor")
@@ -9,18 +9,18 @@ if(time === null)
 //let host = "https://api."+window.location.hostname;
 let host = "http://localhost:1337";
 let api_link = undefined;
-if (depth)
+if (finishArticle)
 {
-    api_link = `${host}/linkedarticles?startArticle=${startArticle}&depth=${depth}&processfor=${time}`
+    api_link = `${host}/allShortestPaths?startArticle=${startArticle}&finishArticle=${finishArticle}&depth=${depth}&processfor=${time}`
 }
 else if (category)
 {
     api_link = `${host}/articlesOfCategory?category=${category}&processfor=${time}`
 }
-else if (finishArticle)
-{
-    api_link = `${host}/allShortestPaths?startArticle=${startArticle}&finishArticle=${finishArticle}&processfor=${time}`
-}
+else if (depth)
+ {
+     api_link = `${host}/linkedarticles?startArticle=${startArticle}&depth=${depth}&processfor=${time}`
+ }
 console.log(api_link)
 
 sigma.parsers.json(api_link, {
