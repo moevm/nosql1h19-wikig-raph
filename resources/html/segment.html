@@ -21,22 +21,26 @@
 <body>
 
   <!-- Start your project here-->
-  <h4>
-<p class="black-text w-responsive text-center mx-auto mb-5">Показать сегмент Википедии</p>
-</h4>
+  <h4 class="mt-3">
+    <p class="black-text w-responsive text-center mx-auto mb-5">Показать сегмент Википедии</p>
+  </h4>
    <!-- Grid row -->
   <div class="row">
     <form class="col-6 offset-3" action="/html/result.html" method="get">
     <!-- Grid column -->
 
-            <!-- Body -->
-            <div class="md-form ">
-              <input type="text" id="form-category" class="form-control" name="category">
-              <label for="form-category">Категория</label>
-            </div>
-            <div class="text-center">
-              <button class="btn btn-light-blue" type="submit">Отправить</button>
-            </div>
+      <!-- Body -->
+      <div class="md-form ">
+        <input type="text" id="form-category" class="form-control" name="category">
+        <label for="form-category">Категория</label>
+      </div>
+      <div class="md-form">
+        <input name="processfor" type="text" id="processfor" class="form-control">
+        <label for="processfor">Время маппинга вершин (10 по умолчанию)</label>
+      </div>
+      <div class="text-center">
+        <button class="btn btn-light-blue" type="submit">Отправить</button>
+      </div>
 
 
 

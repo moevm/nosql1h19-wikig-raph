@@ -46,7 +46,6 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
                     println("--Trying to get links from wikipedia API...")
 
                     val links = WikipediaApiClient.getLinks(currNode)
-
                     println("--Trying to store links into NEO4J...")
                     val time = measureNanoTime{
                         Neo4jClient.addTitle(links)
