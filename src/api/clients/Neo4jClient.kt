@@ -58,10 +58,24 @@ object Neo4jClient {
                 size = title.getAsJsonPrimitive("size").asString.toInt()
             }
         }
+        val titleList = links.map{
+            it.asJsonObject.get("title")
+        }
+        val titleListString = titleList.joinToString(", ", "[", "]")
+
         val baseTitle = title.getAsJsonPrimitive("title").asString
         val id = title.getAsJsonPrimitive("id").asString
 
         driver.session().beginTransaction().use { tx->
+            val result = tx.run("MATCH (base:Article)\n" +
+                    "WHERE base.articleTitle IN $titleListString\n" +
+                    "RETURN base.articleTitle as title")
+
+            var existsArticles: Array<String> = arrayOf()
+            while (result.hasNext()) {
+                existsArticles = existsArticles.plus(result.next().get("title").asString())
+            }
+
             tx.run(
                 "MERGE (base:Article {articleTitle: {title}}) " +
                         "SET base.size = {size}",
@@ -82,12 +96,14 @@ object Neo4jClient {
                         "categoryTitle", category)
                 )
             }
-
             repeat(links.size) {
                 val currTitle = links[it].asJsonObject.getAsJsonPrimitive("title").asString
-                tx.run(
-                    "MERGE (child:Article {articleTitle: {title}})",
-                    parameters("title", currTitle))
+                if (currTitle !in existsArticles)
+                {
+                    tx.run(
+                        "CREATE (child:Article {articleTitle: {title}})",
+                        parameters("title", currTitle))
+                }
 
                 tx.run(
                     "MATCH (baseArticle:Article { articleTitle: {baseTitle} })," +
@@ -125,8 +141,11 @@ object Neo4jClient {
             it.beginTransaction().use { tx ->
 
                 tx.run(
-                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
-                            "return n', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
+                    "CALL apoc.export.graphml.query('MATCH (c:Category{categoryTitle: \"$category\"})-->(n:Article)," +
+                            "(c:Category{categoryTitle:\"$category\"})-->(m:Article)\n" +
+                            "OPTIONAL MATCH (n)-[r]->(m)\n" +
+                            "RETURN n,m,r;', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', " +
+                            "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
 //                tx.run(
 //                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
@@ -143,12 +162,12 @@ object Neo4jClient {
     {
         driver.session().use {
             it.beginTransaction().use { tx ->
-                println("depth: $depth")
                 tx.run(
                     "CALL apoc.export.graphml.query('MATCH (start:Article{articleTitle:\"$startArticle\"})," +
                             "(finish:Article{articleTitle:\"$finishArticle\"})," +
                             "path = allShortestPaths( (start)-[*..$depth]-(finish) )\n" +
-                            "RETURN path', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
+                            "RETURN path', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}', " +
+                            "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
 //                tx.run(
 //                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
@@ -160,6 +179,9 @@ object Neo4jClient {
             }
         }
     }
+
+    // TODO: Store category
+    // w/api.php?action=query&list=categorymembers&cmtitle=Category:{categoryTitle}&cmlimit=max&cmnamespace=0&format=json
 
     // TODO: There is no reason anymore to be JSON Array as return value for this one
     fun getLinks(title : String) : JsonArray
