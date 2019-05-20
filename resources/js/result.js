@@ -23,6 +23,67 @@ else if (depth)
  }
 console.log(api_link)
 
+
+sigma.classes.graph.addMethod('neighbors', function(nodeId) {
+    var k,
+        neighbors = {},
+        index = this.allNeighborsIndex[nodeId] || {};
+
+    for (k in index) {
+        neighbors[k] = this.nodesIndex[k];
+    }
+    return neighbors;
+});
+
+
+/*function mute(node) {
+console.log(node);
+    node.setAttributeNS(null, 'class', node.getAttribute('class') + ' muted');
+}
+
+function unmute(node) {
+  node.setAttributeNS(null, 'class', node.getAttribute('class').replace(/(\s|^)muted(\s|$)/g, '$2'));
+}
+
+$('.sigma-node').click(function() {
+
+  // Muting
+  $('.sigma-node, .sigma-edge').each(function() {
+    mute(this);
+  });
+
+  // Unmuting neighbors
+  var neighbors = s.graph.neighborhood($(this).attr('data-node-id'));
+  neighbors.nodes.forEach(function(node) {
+    unmute($('[data-node-id="' + node.id + '"]')[0]);
+  });
+
+  neighbors.edges.forEach(function(edge) {
+    unmute($('[data-edge-id="' + edge.id + '"]')[0]);
+  });
+});*/
+document.getElementById("inlineFormInput").submit = function(){
+    searchNodeByLabel();
+     alert("da");
+     return false;
+}
+
+function searchNodeByLabel(){
+    let label = document.getElementById("inlineFormInput").value;
+    s.graph.nodes().forEach(function(n) {
+        if (n.label === label){
+        alert("DA");
+        return false;
+            //document.getElementById("inlineFormInput").value = "НАШЛАСЬ!";
+            //return n;
+        }
+    });
+    alert("NET");
+    return false;
+}
+
+
+
 sigma.parsers.json(api_link, {
   renderer: {
     container: document.getElementById('graph-container'),
@@ -33,24 +94,70 @@ sigma.parsers.json(api_link, {
      // hideNodesOnMove: true,
      hideEdgesOnMove: true,
      minEdgeSize: 0.5,
-     maxEdgeSize: 4,
+     maxEdgeSize: 1,
   }
-});
-// обработчик кликов,надо будет немного переписать
-// Bind the events:
-// s.bind('clickNode', (e) => {
-//   let neighbors = s.graph.neighborhood(e.data.node.id);
-//   console.log(e.data)
-//   // s.graph.nodes().forEach(() => {
-//   //   mute(this)
-//   // })
-//   // s.graph.edges.forEach((el) => {
-//   //   mute(el);
-//   // });
-//   // console.log(e.neighbors);
-//   // neighbors.nodes
-//   if (e.data.captor.ctrlKey)
-//     window.open('https://en.wikipedia.org/wiki/'+encodeURIComponent(e.data.node.label), '_blank');
-// })
+},
+  function(s) {
+  // Initialize the dragNodes plugin:
+  var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+
+  dragListener.bind('startdrag', function(event) {
+    console.log(event);
+  });
+  dragListener.bind('drag', function(event) {
+    console.log(event);
+  });
+  dragListener.bind('drop', function(event) {
+    console.log(event);
+  });
+  dragListener.bind('dragend', function(event) {
+    console.log(event);
+  });
+          console.log(s.graph.edges());
+          console.log(s.graph.nodes());
+         /* console.log(s.graph.nodes().sort(function(a,b) {
+            if (a.size < b.size)
+                return a;
+            else if (a.size > b.size)
+                return b;
+            else
+                return 0;
+          }));*/
+            s.graph.edges().forEach(function(e) {
+                e.color = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.52)";
+            });
+
+          s.graph.nodes().forEach(function(n) {
+                   n.color = "rgb("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+")";
+                   });
+                  // обработчик кликов,надо будет немного переписать
+                  // Bind the events:
+                   s.bind('clickNode', (e) => {
+                     document.getElementById("relatedNodes").innerHTML = " ";
+                     let neighbors = s.graph.neighbors(e.data.node.id);
+                     //console.log(neighbors);
+                     //console.log(e.data);
+                     for (n in neighbors){
+                     //console.log(neighbors[n]);
+                        document.getElementById("relatedNodes").innerHTML += "<li><a href='https://en.wikipedia.org/wiki/" + neighbors[n].label + "'>" + neighbors[n].label + "</a></li>";
+                     }
+                    /* console.log(s.graph);
+                     for (let i = 0; i < neighbors.length; i++){
+                        mute(neighbors[i]);
+
+                     }
+                      s.graph.edges.forEach((el) => {
+                        mute(el);
+                      });*/
+
+                      //ctrl+лкм переход на википедию
+                     if (e.data.captor.ctrlKey)
+                       window.open('https://en.wikipedia.org/wiki/'+encodeURIComponent(e.data.node.label), '_blank');
+                   });
+              s.refresh();
+      }
+);
+
+
 // обработка перемещения вершин
 //var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
