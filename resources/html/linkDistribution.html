@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Распеделение ссылок</title>
+    <title>Распределение ссылок - NoSQL Wikipedia Graph</title>
     <!-- Favicon -->
     <link rel="shortcut icon" href="/img/icon.png" type="image/x-icon">
     <!-- Font Awesome -->
@@ -20,21 +20,24 @@
 
 
 </head>
-<body onload="loadDistribution()">
+<body onload="loadDistribution()" >
     <div class="container">
         <div class="row mt-3">
             <div class="col-sm-12">
-                Если шо это логарифмическая шкала. Никит, напиши красиво, я верю ты можешь
+                <h2>Распределение исходящих ребер</h2>
+                <br>
+                <h6>На графике ниже используется логарифмическая шкала.</h6>
             </div>
         </div>
         <div class="row mt-3">
             <div class="col-sm-12">
                 <div id="visualization"></div>
             </div>
+
         </div>
         <div class="row mt-3">
-            <div class="col-sm-12">
-                <table class="table">
+            <div class="col-sm-12" style="height:300px;overflow-y: auto; display: block;">
+                <table class="table" >
                     <thead id="table_head"></thead>
                     <tbody id="table_body"></tbody>
                 </table>
