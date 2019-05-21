@@ -4,12 +4,10 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.wikiparser.tools.Settings
-import io.ktor.application.call
 import org.neo4j.driver.v1.AuthTokens
 import org.neo4j.driver.v1.Driver
 import org.neo4j.driver.v1.GraphDatabase
 import org.neo4j.driver.v1.Values.parameters
-import kotlin.system.measureNanoTime
 
 
 object Neo4jClient {
@@ -160,19 +158,18 @@ object Neo4jClient {
 
     fun getAllShortestPaths(startArticle: String, finishArticle: String, depth: Int, resultFileName : String, resultFilePath : String = "/")
     {
+        val filePath = resultFilePath.replace('\\', '/') + "/" + resultFileName
+        println(filePath)
+        println()
         driver.session().use {
             it.beginTransaction().use { tx ->
                 tx.run(
                     "CALL apoc.export.graphml.query('MATCH (start:Article{articleTitle:\"$startArticle\"})," +
                             "(finish:Article{articleTitle:\"$finishArticle\"})," +
                             "path = allShortestPaths( (start)-[*..$depth]-(finish) )\n" +
-                            "RETURN path', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}', " +
+                            "RETURN path', \'${filePath}', " +
                             "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
-//                tx.run(
-//                    "CALL apoc.export.graphml.query('MATCH (:Category{categoryTitle:\"$category\"})-->(n:Article)\n" +
-//                            "return n', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"categoryTitle\"], format:\"gephi\"})"
-//                )
 
                 tx.success()
 
@@ -244,6 +241,35 @@ object Neo4jClient {
                     return result.next().get("COUNT(article)").asInt()
                 else
                     return 0
+            }
+        }
+    }
+
+    fun exportToFile(resultFileName : String, resultFilePath : String = "/") {
+        val filePath = resultFilePath.replace('\\', '/') + resultFileName
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+                tx.run (
+                    "CALL apoc.export.graphml.all('$filePath', " +
+                            "{useTypes:true})"
+                )
+                tx.success()
+
+            }
+        }
+    }
+
+    fun importFromFile(resultFileName : String, resultFilePath : String = "/") {
+//        val filePath = resultFilePath.replace('\\', '/') + resultFileName
+//        println(filePath)
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+                tx.run (
+                    "CALL apoc.import.graphml('$resultFileName', " +
+                            "{batchSize: 10000, readLabels: true, storeNodeIds: false})"
+                )
+                tx.success()
+
             }
         }
     }

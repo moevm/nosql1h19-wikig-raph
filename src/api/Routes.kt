@@ -1,6 +1,5 @@
 package com.wikiparser.api
 
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.wikiparser.api.clients.GephiClient
 import com.wikiparser.clients.Neo4jClient
@@ -12,8 +11,6 @@ import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.util.flattenForEach
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureNanoTime
 
@@ -108,6 +105,9 @@ fun Routing.apiRoutes()
     getCategory()
     getAllShortestPaths()
     getCountOfArticles()
+
+    exportToFile()
+    importFromFile()
 }
 
 fun Route.getLinks()
@@ -263,5 +263,28 @@ fun Route.getCountOfArticles(){
     get("/countOfArticles"){
         val result = Neo4jClient.getCountOfArticles()
         call.respond(result)
+    }
+}
+
+fun Route.exportToFile(){
+    get("/exportToFile") {
+        val filename = call.parameters["filename"] ?: "export.graphml"
+        println(filename)
+//        val filepath = "D:\\Programs\\neo4j-community-3.5.5\\import\\"
+        val filepath = "/var/lib/neo4j/import"
+        Neo4jClient.exportToFile(filename,
+            filepath)
+        call.respondText("exported")
+    }
+}
+
+fun Route.importFromFile(){
+
+    get("/importFromFile") {
+        val filename = call.parameters["filename"] ?: "export.graphml"
+        println(filename)
+        Neo4jClient.importFromFile(filename,
+            "/")
+        call.respondText("exported")
     }
 }
