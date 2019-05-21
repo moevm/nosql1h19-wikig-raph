@@ -125,43 +125,96 @@
       </div>
     </div>
     <!-- Grid column -->
-
   </div>
 
 
+  <div class="row text-center">
 
-  <!-- <div class="container">
-    <div class="row">
-      <div class="col-3"></div>
-      <div class="col-6">
-        <form action="findAtoB.html">
-          <input class="btn btn-primary" type="submit" value="something like this text">
-        </form>
+    <!-- Grid column -->
+    <div class="col-lg-6 col-md-6 mb-lg-0 mb-6">
+      <!--Featured image-->
+      <div class="view overlay rounded z-depth-1">
+
+        <a>
+          <div class="mask rgba-white-slight"></div>
+        </a>
       </div>
-      <div class="col-3"></div>
+      <!--Excerpt-->
+      <div class="card-body pb-0">
+        <h4 class="font-weight-bold my-3">Экспорт</h4>
+        <!--<p class="grey-text">Узнать, есть ли связь между двумя статьями на Википедии. Сервис проанализирует ссылки в статье А и построит граф, на котором будет отмечен путь от А до Б.</p>-->
+        <button type="button" class="btn btn-indigo btn-sm" data-toggle="modal" data-target="#exportModal">
+          Выполнить
+        </button>
+        <!--<button class="btn btn-indigo btn-sm" onclick="exportDB()">Выполнить</button>-->
+      </div>
+    </div>
+    <!-- Grid column -->
+
+    <!-- Grid column -->
+    <div class="col-lg-4 col-md-6 mb-md-0 mb-4">
+      <!--Featured image-->
+      <div class="view overlay rounded z-depth-1">
+
+        <a>
+          <div class="mask rgba-white-slight"></div>
+        </a>
+      </div>
+      <!--Excerpt-->
+      <div class="card-body pb-0">
+        <h4 class="font-weight-bold my-3">Импорт</h4>
+        <!--<p class="grey-text">Пользователь выбирает некоторое подмножество статей Википедии, и сервис строит граф выбранного подмножества с ссылками-ребрами между вершинами-статьями.</p>-->
+        <!--<button class="btn btn-indigo btn-sm" onclick="importDB()">Показать</button>-->
+        <button type="button" class="btn btn-indigo btn-sm" data-toggle="modal" data-target="#importModal">
+          Выполнить
+        </button>
+      </div>
+    </div>
+    <!-- Grid column -->
+
+    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="importModalLabel">Импорт</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="importFilename">Название файла</label>
+            <input name="importFilename" type="text" id="importFilename" class="form-control">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="importDB()">Импортировать</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-      <div class="col-3"></div>
-      <div class="col-6">
-        <form action="segment.html">
-          <input class="btn btn-primary" type="submit" value="something like this text">
-        </form>
+    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exportModalLabel">Импорт</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label for="importFilename">Название файла</label>
+            <input name="exportFilename" type="text" id="exportFilename" class="form-control">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Закрыть</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="exportDB()">Экспортировать</button>
+          </div>
+        </div>
       </div>
-      <div class="col-3"></div>
     </div>
 
-    <div class="row">
-      <div class="col-3"></div>
-      <div class="col-6">
-        <form action="findFromA.html">
-          <input class="btn btn-primary" type="submit" value="something like this text">
-        </form>
-      </div>
-      <div class="col-3"></div>
-    </div>
-  </div> -->
-  <!-- /Start your project here-->
+  </div>
 
   <!-- SCRIPTS -->
   <!-- JQuery -->

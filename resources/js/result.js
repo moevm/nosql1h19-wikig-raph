@@ -6,8 +6,8 @@ let category = urlParams.get("category")
 let time = urlParams.get("processfor")
 if(time === null)
   time = 10
-//let host = "https://api."+window.location.hostname;
-let host = "http://localhost:1337";
+let host = "https://api."+window.location.hostname;
+//let host = "http://localhost:1337";
 let api_link = undefined;
 if (finishArticle)
 {
