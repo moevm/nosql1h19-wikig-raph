@@ -139,10 +139,11 @@ object Neo4jClient {
             it.beginTransaction().use { tx ->
 
                 tx.run(
-                    "CALL apoc.export.graphml.query('MATCH (c:Category{categoryTitle: \"$category\"})-->(n:Article)," +
-                            "(c:Category{categoryTitle:\"$category\"})-->(m:Article)\n" +
-                            "OPTIONAL MATCH (n)-[r]->(m)\n" +
-                            "RETURN n,m,r;', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', " +
+                    "CALL apoc.export.graphml.query(" +
+                            "'MATCH (n:Category{categoryTitle:\"$category\"})-->(a), " +
+                            "(n:Category{categoryTitle:\"$category\"})-[*0..1]->(b)\n" +
+                            "OPTIONAL MATCH (a)-[r]->(b)\n" +
+                            "RETURN a,b,r;', \'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', " +
                             "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
 //                tx.run(
