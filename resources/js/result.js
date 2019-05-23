@@ -6,9 +6,10 @@ let category = urlParams.get("category")
 let time = urlParams.get("processfor")
 if(time === null)
   time = 10
-let host = "https://api."+window.location.hostname;
-//let host = "http://localhost:1337";
+//let host = "https://api."+window.location.hostname;
+let host = "http://localhost:1337";
 let api_link = undefined;
+
 if (finishArticle)
 {
     api_link = `${host}/allShortestPaths?startArticle=${startArticle}&finishArticle=${finishArticle}&depth=${depth}&processfor=${time}`
@@ -100,7 +101,18 @@ sigma.parsers.json(api_link, {
   function(s) {
   // Initialize the dragNodes plugin:
   var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
+  let count_of_articles = s.graph.nodes().length;
 
+  let xhr = new XMLHttpRequest();
+  xhr.open('GET', host + '/countOfArticles', false);
+  xhr.send();
+  if (xhr.status != 200) {
+    console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+  } else {
+    let db_size = parseInt(xhr.responseText);
+    document.getElementById('count_of_articles').innerHTML = count_of_articles;
+    document.getElementById('coverage_percentage').innerHTML = Math.round(count_of_articles*100/db_size);
+  }
   dragListener.bind('startdrag', function(event) {
     console.log(event);
   });
