@@ -166,7 +166,7 @@ object Neo4jClient {
                 tx.run(
                     "CALL apoc.export.graphml.query('MATCH (start:Article{articleTitle:\"$startArticle\"})," +
                             "(finish:Article{articleTitle:\"$finishArticle\"})," +
-                            "path = shortestPath( (start)-[*..$depth]-(finish) )\n" +
+                            "path = shortestPath( (start)-[:ArticleLink *..$depth]-(finish) )\n" +
                             "RETURN path', \'${filePath}', " +
                             "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
