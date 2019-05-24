@@ -4,6 +4,7 @@ let finishArticle = urlParams.get("endArticle")
 let depth = urlParams.get("depth")
 let category = urlParams.get("category")
 let time = urlParams.get("processfor")
+let NODES = null;
 if(time === null)
   time = 10
 //let host = "https://api."+window.location.hostname;
@@ -69,22 +70,6 @@ document.getElementById("inlineFormInput").submit = function(){
      return false;
 }
 
-function searchNodeByLabel(){
-    let label = document.getElementById("inlineFormInput").value;
-    s.graph.nodes().forEach(function(n) {
-        if (n.label === label){
-        alert("DA");
-        return false;
-            //document.getElementById("inlineFormInput").value = "НАШЛАСЬ!";
-            //return n;
-        }
-    });
-    alert("NET");
-    return false;
-}
-
-
-
 sigma.parsers.json(api_link, {
   renderer: {
     container: document.getElementById('graph-container'),
@@ -125,6 +110,7 @@ sigma.parsers.json(api_link, {
   dragListener.bind('dragend', function(event) {
     console.log(event);
   });
+          NODES = s.graph.nodes()
           console.log(s.graph.edges());
           console.log(s.graph.nodes());
          /* console.log(s.graph.nodes().sort(function(a,b) {
@@ -171,5 +157,18 @@ sigma.parsers.json(api_link, {
 );
 
 
+function searchNodeByLabel(){
+    let label = document.getElementById("inlineFormInput").value;
+    s.graph.nodes().forEach(function(n) {
+        if (n.label === label){
+        alert("DA");
+        return false;
+            //document.getElementById("inlineFormInput").value = "НАШЛАСЬ!";
+            //return n;
+        }
+    });
+    alert("NET");
+    return false;
+}
 // обработка перемещения вершин
 //var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
