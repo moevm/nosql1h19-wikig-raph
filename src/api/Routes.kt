@@ -269,8 +269,8 @@ fun Route.exportToFile(){
     get("/exportToFile") {
         val filename = call.parameters["filename"] ?: "export.graphml"
         println(filename)
-        val filepath = "D:\\Programs\\neo4j-community-3.5.5\\import\\"
-//        val filepath = "/var/lib/neo4j/import/"
+//        val filepath = "D:\\Programs\\neo4j-community-3.5.5\\import\\"
+        val filepath = "/var/lib/neo4j/import/"
         Neo4jClient.exportToFile(filename,
             filepath)
         call.respondText("exported")
