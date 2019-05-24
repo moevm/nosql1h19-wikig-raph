@@ -96,7 +96,7 @@ sigma.parsers.json(api_link, {
   } else {
     let db_size = parseInt(xhr.responseText);
     document.getElementById('count_of_articles').innerHTML = count_of_articles;
-    document.getElementById('coverage_percentage').innerHTML = Math.round(count_of_articles*100/db_size);
+    document.getElementById('coverage_percentage').innerHTML = Math.round(count_of_articles*100000/db_size)/1000;
   }
 //  dragListener.bind('startdrag', function(event) {
 ////    console.log(event);
