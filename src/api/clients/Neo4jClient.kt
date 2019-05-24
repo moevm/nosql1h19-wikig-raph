@@ -62,7 +62,6 @@ object Neo4jClient {
         val titleListString = titleList.joinToString(", ", "[", "]")
 
         val baseTitle = title.getAsJsonPrimitive("title").asString
-        val id = title.getAsJsonPrimitive("id").asString
 
         driver.session().beginTransaction().use { tx->
             val result = tx.run("MATCH (base:Article)\n" +
@@ -122,7 +121,7 @@ object Neo4jClient {
         driver.session().use {
             it.beginTransaction().use { tx ->
 
-                val result = tx.run(
+                tx.run(
                     "CALL apoc.export.graphml.query('MATCH path = (:Article{articleTitle:\"$startArticle\"})-[*1..$depth]->(:Article)\n" +
                             "WITH collect(path) AS paths RETURN paths',\'${resultFilePath.replace('\\', '/') + "/" + resultFileName}\', {useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
@@ -167,7 +166,7 @@ object Neo4jClient {
                 tx.run(
                     "CALL apoc.export.graphml.query('MATCH (start:Article{articleTitle:\"$startArticle\"})," +
                             "(finish:Article{articleTitle:\"$finishArticle\"})," +
-                            "path = allShortestPaths( (start)-[*..$depth]-(finish) )\n" +
+                            "path = shortestPath( (start)-[*..$depth]-(finish) )\n" +
                             "RETURN path', \'${filePath}', " +
                             "{useTypes:true, storeNodeIds:false, caption:[\"articleTitle\"], format:\"gephi\"})"
                 )
@@ -178,15 +177,13 @@ object Neo4jClient {
         }
     }
 
-    // TODO: Store category
-    // w/api.php?action=query&list=categorymembers&cmtitle=Category:{categoryTitle}&cmlimit=max&cmnamespace=0&format=json
 
     // TODO: There is no reason anymore to be JSON Array as return value for this one
     fun getLinks(title : String) : JsonArray
     {
 
         val resultArray = JsonArray()
-        val result = driver.session().use {
+        driver.session().use {
             it.beginTransaction().use{ tx->
 
                 val result = tx.run("MATCH (:Article {articleTitle: {title}})-->(link)" +
@@ -260,7 +257,7 @@ object Neo4jClient {
         }
     }
 
-    fun importFromFile(resultFileName : String, resultFilePath : String = "/") {
+    fun importFromFile(resultFileName : String) {
 //        val filePath = resultFilePath.replace('\\', '/') + resultFileName
 //        println(filePath)
         driver.session().use {
@@ -268,6 +265,19 @@ object Neo4jClient {
                 tx.run (
                     "CALL apoc.import.graphml('$resultFileName', " +
                             "{batchSize: 10000, readLabels: true, storeNodeIds: false})"
+                )
+                tx.success()
+
+            }
+        }
+    }
+
+    fun dropDB()
+    {
+        driver.session().use {
+            it.beginTransaction().use { tx ->
+                tx.run (
+                    "MATCH (n) DETACH DELETE (n);"
                 )
                 tx.success()
 

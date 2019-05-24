@@ -25,7 +25,7 @@ fun checkGraphToDepth(startArticle : String, depth : Int)
 
     while(currDepth > 0)
     {
-        var nodesFromIteration = ArrayList<String>()
+        val nodesFromIteration = ArrayList<String>()
 
         nodesForIteration.forEach {
             currNode ->
@@ -108,6 +108,7 @@ fun Routing.apiRoutes()
 
     exportToFile()
     importFromFile()
+    dropDB()
 }
 
 fun Route.getLinks()
@@ -129,7 +130,6 @@ fun Route.getTitle() {
     get("/title/")
     {
         val titleName = call.parameters["article"]
-        val parameters = call.parameters
 
         println(call.request.headers.forEach { s, list -> println(s); println(list)  })
         if (titleName != null) {
@@ -228,8 +228,7 @@ fun Route.getCategory()
     }
 }
 
-fun Route.getAllShortestPaths()
-{
+fun Route.getAllShortestPaths(){
     get("/allShortestPaths")
     {
         val startArticle = call.parameters["startArticle"] ?: ""
@@ -270,8 +269,8 @@ fun Route.exportToFile(){
     get("/exportToFile") {
         val filename = call.parameters["filename"] ?: "export.graphml"
         println(filename)
-//        val filepath = "D:\\Programs\\neo4j-community-3.5.5\\import\\"
-        val filepath = "/var/lib/neo4j/import"
+        val filepath = "D:\\Programs\\neo4j-community-3.5.5\\import\\"
+//        val filepath = "/var/lib/neo4j/import/"
         Neo4jClient.exportToFile(filename,
             filepath)
         call.respondText("exported")
@@ -283,8 +282,14 @@ fun Route.importFromFile(){
     get("/importFromFile") {
         val filename = call.parameters["filename"] ?: "export.graphml"
         println(filename)
-        Neo4jClient.importFromFile(filename,
-            "/")
+        Neo4jClient.importFromFile(filename)
         call.respondText("exported")
+    }
+}
+
+fun Route.dropDB(){
+    get("/dropDB") {
+        Neo4jClient.dropDB()
+        call.respondText("droped")
     }
 }

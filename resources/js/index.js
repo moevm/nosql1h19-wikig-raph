@@ -1,5 +1,5 @@
- let host = "https://api."+window.location.hostname;
-//let host = "http://localhost:1337";
+// let host = "https://api."+window.location.hostname;
+let host = "http://localhost:1337";
 function onLoadPage(){
 
     articleCount = document.getElementById('articleCount')
@@ -14,7 +14,6 @@ function onLoadPage(){
 }
 
 function exportDB() {
-    alert("export")
     let filename = document.getElementById('exportFilename').value.trim()
     if( filename == null || filename == "")
     {
@@ -29,6 +28,7 @@ function exportDB() {
           console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
         } else {
           $('#exportModal').modal('hide')
+          alert("success")
         }
     }
 }
@@ -47,6 +47,20 @@ function importDB() {
           alert('error')
         } else {
           $('#importModal').modal('hide')
+          alert("success")
         }
+    }
+}
+
+
+function dropDB() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', host + '/dropDB', false);
+    xhr.send();
+    if (xhr.status != 200) {
+      console.log( xhr.status + ': ' + xhr.statusText ); // пример вывода: 404: Not Found
+      alert('error')
+    } else {
+      alert("Успешно")
     }
 }

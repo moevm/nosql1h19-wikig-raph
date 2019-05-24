@@ -64,11 +64,7 @@ $('.sigma-node').click(function() {
     unmute($('[data-edge-id="' + edge.id + '"]')[0]);
   });
 });*/
-document.getElementById("inlineFormInput").submit = function(){
-    searchNodeByLabel();
-     alert("da");
-     return false;
-}
+
 
 sigma.parsers.json(api_link, {
   renderer: {
@@ -87,7 +83,11 @@ sigma.parsers.json(api_link, {
   // Initialize the dragNodes plugin:
   var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);
   let count_of_articles = s.graph.nodes().length;
-
+//  function onclickSearch(){
+//      searchNodeByLabel(s);
+//       alert("da");
+//       return false;
+//  }
   let xhr = new XMLHttpRequest();
   xhr.open('GET', host + '/countOfArticles', false);
   xhr.send();
@@ -98,31 +98,21 @@ sigma.parsers.json(api_link, {
     document.getElementById('count_of_articles').innerHTML = count_of_articles;
     document.getElementById('coverage_percentage').innerHTML = Math.round(count_of_articles*100/db_size);
   }
-  dragListener.bind('startdrag', function(event) {
-    console.log(event);
-  });
-  dragListener.bind('drag', function(event) {
-    console.log(event);
-  });
-  dragListener.bind('drop', function(event) {
-    console.log(event);
-  });
-  dragListener.bind('dragend', function(event) {
-    console.log(event);
-  });
+//  dragListener.bind('startdrag', function(event) {
+////    console.log(event);
+//  });
+//  dragListener.bind('drag', function(event) {
+////    console.log(event);
+//  });
+//  dragListener.bind('drop', function(event) {
+////    console.log(event);
+//  });
+//  dragListener.bind('dragend', function(event) {
+//  });
           NODES = s.graph.nodes()
-          console.log(s.graph.edges());
-          console.log(s.graph.nodes());
-         /* console.log(s.graph.nodes().sort(function(a,b) {
-            if (a.size < b.size)
-                return a;
-            else if (a.size > b.size)
-                return b;
-            else
-                return 0;
-          }));*/
             s.graph.edges().forEach(function(e) {
                 e.color = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.52)";
+                e.type = "arrow"
             });
 
           s.graph.nodes().forEach(function(n) {
@@ -157,18 +147,18 @@ sigma.parsers.json(api_link, {
 );
 
 
-function searchNodeByLabel(){
-    let label = document.getElementById("inlineFormInput").value;
-    s.graph.nodes().forEach(function(n) {
-        if (n.label === label){
-        alert("DA");
-        return false;
-            //document.getElementById("inlineFormInput").value = "НАШЛАСЬ!";
-            //return n;
-        }
-    });
-    alert("NET");
-    return false;
-}
+//function searchNodeByLabel(s){
+//    let label = document.getElementById("inlineFormInput").value;
+//    s.graph.nodes().forEach(function(n) {
+//        if (n.label === label){
+//        alert("DA");
+//        return false;
+//            //document.getElementById("inlineFormInput").value = "НАШЛАСЬ!";
+//            //return n;
+//        }
+//    });
+//    alert("NET");
+//    return false;
+//}
 // обработка перемещения вершин
 //var dragListener = sigma.plugins.dragNodes(s, s.renderers[0]);

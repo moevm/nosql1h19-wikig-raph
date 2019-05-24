@@ -131,14 +131,14 @@
   <div class="row text-center">
 
     <!-- Grid column -->
-    <div class="col-lg-6 col-md-6 mb-lg-0 mb-6">
+    <div class="col-lg-4 col-md-6 mb-lg-0 mb-6">
       <!--Featured image-->
-      <div class="view overlay rounded z-depth-1">
+      <!--<div class="view overlay rounded z-depth-1">-->
 
-        <a>
-          <div class="mask rgba-white-slight"></div>
-        </a>
-      </div>
+        <!--<a>-->
+          <!--<div class="mask rgba-white-slight"></div>-->
+        <!--</a>-->
+      <!--</div>-->
       <!--Excerpt-->
       <div class="card-body pb-0">
         <h4 class="font-weight-bold my-3">Экспорт</h4>
@@ -154,18 +154,32 @@
     <!-- Grid column -->
     <div class="col-lg-4 col-md-6 mb-md-0 mb-4">
       <!--Featured image-->
-      <div class="view overlay rounded z-depth-1">
+      <!--<div class="view overlay rounded z-depth-1">-->
 
-        <a>
-          <div class="mask rgba-white-slight"></div>
-        </a>
-      </div>
+        <!--<a>-->
+          <!--<div class="mask rgba-white-slight"></div>-->
+        <!--</a>-->
+      <!--</div>-->
       <!--Excerpt-->
       <div class="card-body pb-0">
         <h4 class="font-weight-bold my-3">Импорт</h4>
-        <!--<p class="grey-text">Пользователь выбирает некоторое подмножество статей Википедии, и сервис строит граф выбранного подмножества с ссылками-ребрами между вершинами-статьями.</p>-->
-        <!--<button class="btn btn-indigo btn-sm" onclick="importDB()">Показать</button>-->
         <button type="button" class="btn btn-indigo btn-sm" data-toggle="modal" data-target="#importModal">
+          Выполнить
+        </button>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-12 mb-md-0 mb-4">
+      <!--Featured image-->
+      <!--<div class="view overlay rounded z-depth-1">-->
+
+      <!--<a>-->
+      <!--<div class="mask rgba-white-slight"></div>-->
+      <!--</a>-->
+      <!--</div>-->
+      <!--Excerpt-->
+      <div class="card-body pb-0">
+        <h4 class="font-weight-bold my-3">Дроп базы данных</h4>
+        <button type="button" class="btn btn-indigo btn-sm" onclick="dropDB()">
           Выполнить
         </button>
       </div>
@@ -192,7 +206,6 @@
         </div>
       </div>
     </div>
-
     <div class="modal fade" id="exportModal" tabindex="-1" role="dialog" aria-labelledby="exportModal" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">

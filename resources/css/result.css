@@ -1,0 +1,27 @@
+html {
+	overflow-x: hidden;
+}
+
+#graph-container {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    background-color: #fff;
+}
+.sigma-edge {
+    stroke: #14191C;
+}
+.sigma-node {
+    fill: green;
+    stroke: #14191C;
+    stroke-width: 2px;
+}
+.sigma-node:hover {
+    fill: blue;
+}
+.muted {
+    fill-opacity: 0.1;
+    stroke-opacity: 0.1;
+}
