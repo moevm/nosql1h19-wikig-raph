@@ -1,5 +1,5 @@
 // let host = "https://api."+window.location.hostname;
-let host = "http://localhost:1337";
+let host = "http://176.223.134.107:1337";
 function onLoadPage(){
 
     articleCount = document.getElementById('articleCount')
