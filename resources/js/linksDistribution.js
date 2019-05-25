@@ -1,6 +1,6 @@
 function loadDistribution(){
 //     let host = "https://api."+window.location.hostname;
-    let host = "http://176.223.134.107:1337";
+    let host = "http://localhost:1337";
     const urlParams = new URLSearchParams(window.location.search);
     let type = urlParams.get("type")
     let log = true;
