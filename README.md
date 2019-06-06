@@ -10,4 +10,4 @@ $ java -jar build/libs/wikiparser-0.9.0.jar
 5) Перейти по http://localhost:8080/html/index.html. 
 
 
-Пример работы импорта/экспорта, а так же плотность ребер в категории, можно увидеть в [видео](https://youtu.be/GNcuFzWGFVQ)
+Пример работы приложения можно увидеть в [видео](https://youtu.be/3kzx-wKIb8E)
